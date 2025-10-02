@@ -15,7 +15,8 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
         
         var rootElement = visualElement.Q<ObjectField>("RootField");
         rootElement.objectType = typeof(Transform);
-        rootElement.BindProperty(property.FindPropertyRelative(nameof(JiggleRigData.rootBone)));
+        var rootProp = property.FindPropertyRelative(nameof(JiggleRigData.rootBone));
+        rootElement.BindProperty(rootProp);
         rootElement.Q<Label>().text = "Root Transform";
 
         var excludeRootToggleElement = visualElement.Q<Toggle>("ExcludeRootToggle");
@@ -37,6 +38,30 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
         excludeRootToggleElement.RegisterValueChangedCallback(evt => {
             rootSection.style.display = evt.newValue ? DisplayStyle.None : DisplayStyle.Flex;
         });
+
+        var recursiveWarning = visualElement.Q<VisualElement>("PersonalColliderWarning");
+        if (!property.serializedObject.isEditingMultipleObjects && Application.isPlaying) {
+            var rootBone = (Transform)rootProp.objectReferenceValue;
+            var isRecursiveRig = false;
+            foreach (JiggleRig otherRig in Object.FindObjectsByType<JiggleRig>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)) {
+                var otherRoot = otherRig.GetJiggleRigData().rootBone;
+                if (rootBone != otherRoot && rootBone.IsChildOf(otherRoot)) {
+                    isRecursiveRig = true;
+                    break;
+                }
+            }
+
+            if (isRecursiveRig) {
+                recursiveWarning.style.display = DisplayStyle.Flex;
+                var warningText = "Recursive rigs ignore colliders as they get merged with their parent rig. If colliders are needed, add them to the parent rig instead.";
+                HelpBox helpBox = new HelpBox(warningText, HelpBoxMessageType.Warning);
+                recursiveWarning.Add(helpBox);
+            } else {
+                recursiveWarning.style.display = DisplayStyle.None;
+            }
+        } else {
+            recursiveWarning.style.display = DisplayStyle.None;
+        }
 
         return visualElement;
     }

@@ -16,8 +16,11 @@ public class JiggleRigEditor : Editor {
         var visualElement = new VisualElement();
         visualTreeAsset.CloneTree(visualElement);
         InspectorElement.FillDefaultInspector(visualElement, serializedObject, this);
+
+        if (serializedObject.isEditingMultipleObjects) return visualElement;
         
-        var targetObject = (target as JiggleRig).gameObject;
+        var targetRig = (JiggleRig)target;
+        var targetObject = targetRig.gameObject;
         var assetType = PrefabUtility.GetPrefabAssetType(targetObject);
         var instanceStatus = PrefabUtility.GetPrefabInstanceStatus(targetObject);
         var isPrefabInstance = true;
@@ -28,22 +31,26 @@ public class JiggleRigEditor : Editor {
             isPrefabInstance = instanceStatus != PrefabInstanceStatus.NotAPrefab;
             if (targetObject.transform.childCount > 0) isPrefabInstance = false;
         }
-        bool isPrefabAsset = assetType != PrefabAssetType.NotAPrefab && instanceStatus == PrefabInstanceStatus.NotAPrefab;
+
+        bool isPrefabAsset = assetType != PrefabAssetType.NotAPrefab &&
+                             instanceStatus == PrefabInstanceStatus.NotAPrefab;
         if (isPrefabInstance) {
             var prefab = PrefabUtility.GetCorrespondingObjectFromSource(targetObject);
             if (prefab.gameObject.transform.parent != null) {
                 isPrefabAsset = false;
             }
         }
-        
+
         var prefabWarning = visualElement.Q<VisualElement>("PrefabWarning");
         prefabWarning.style.display = DisplayStyle.None;
         if (!(isPrefabAsset || isPrefabInstance)) {
             prefabWarning.style.display = DisplayStyle.Flex;
-            var warningText = "WARNING: For best results, please use one of the default prefabs, or create your own using the project right click > create menu.\nYou can customize the settings without applying them to the prefab while retaining the ability to adjust the settings for all instances within the prefab if desired.";
+            var warningText =
+                "For best results, please use one of the default prefabs, or create your own using the project right click > create menu.\nYou can customize the settings without applying them to the prefab while retaining the ability to adjust the settings for all instances within the prefab if desired.";
             HelpBox helpBox = new HelpBox(warningText, HelpBoxMessageType.Warning);
             prefabWarning.Add(helpBox);
         }
+
         return visualElement;
     }
 }

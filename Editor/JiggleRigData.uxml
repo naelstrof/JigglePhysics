@@ -5,6 +5,7 @@
     <uie:ObjectField label="Object Field" name="RootField" />
     <ui:Toggle label="Toggle" name="ExcludeRootToggle" />
     <uie:PropertyField name="IgnoredTransformsField" />
+    <ui:VisualElement name="PersonalColliderWarning" />
     <uie:PropertyField name="PersonalCollidersField" />
     <ui:VisualElement style="height: 10px;" />
     <ui:VisualElement name="Contents" style="flex-grow: 1;" />
