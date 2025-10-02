@@ -15,6 +15,8 @@ public struct JiggleTransformCachedData {
     public Transform bone;
     public float normalizedDistanceFromRoot;
     public float lossyScale;
+    public Vector3 restLocalPosition;
+    public Vector4 restLocalRotation;
 }
 
 [Serializable]
@@ -33,7 +35,7 @@ public struct JiggleRigData {
 
     private bool TryUpdateSerialization() {
         switch (serializedVersion) {
-            case "v0.0.0":
+            case "v0.0.0": // Collision radius local space -> world space
                 if (rootBone == null) {
                     return false;
                 }
@@ -44,8 +46,45 @@ public struct JiggleRigData {
                 jiggleTreeInputParameters.collisionRadius.value *= scaleCorrection;
                 serializedVersion = "v0.0.1";
                 return true;
+            case "v0.0.1": // rest pose is now serialized on author, generate if missing.
+                var length = transformCachedData.Length;
+                for (int i = 0; i < length; i++) {
+                    var cachedData = transformCachedData[i];
+                    var t = cachedData.bone;
+                    if (!t) continue;
+                    t.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
+                    cachedData.restLocalPosition = localPosition;
+                    cachedData.restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
+                    transformCachedData[i] = cachedData;
+                }
+                serializedVersion = "v0.0.2";
+                return true;
             default:
                 return false;
+        }
+    }
+
+    public void ResampleRestPose() {
+        var length = transformCachedData.Length;
+        for (int i = 0; i < length; i++) {
+            var cachedData = transformCachedData[i];
+            var t = cachedData.bone;
+            if (!t) continue;
+            t.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
+            cachedData.restLocalPosition = localPosition;
+            cachedData.restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
+            transformCachedData[i] = cachedData;
+        }
+        RegenerateCacheLookup();
+    }
+
+    public void SnapToRestPose() {
+        var length = transformCachedData.Length;
+        for (int i = 0; i < length; i++) {
+            var cachedData = transformCachedData[i];
+            var t = cachedData.bone;
+            if (!t || t == rootBone) continue;
+            t.SetLocalPositionAndRotation(cachedData.restLocalPosition, new Quaternion(cachedData.restLocalRotation.x, cachedData.restLocalRotation.y, cachedData.restLocalRotation.z, cachedData.restLocalRotation.w));
         }
     }
 
@@ -121,15 +160,18 @@ public struct JiggleRigData {
         var validChildrenCount = GetValidChildrenCount(t);
         var scale = t.lossyScale;
         currentLength += Vector3.Distance(lastPosition, t.position);
-        t.GetLocalPositionAndRotation(out var pos, out var rot);
+        t.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
+        var position = t.position;
         data.Add(new JiggleTransformCachedData() {
             bone = t,
+            restLocalPosition = localPosition,
+            restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w),
             normalizedDistanceFromRoot = currentLength / totalLength,
             lossyScale = (scale.x + scale.y + scale.x)/3f,
         });
         for (int i = 0; i < validChildrenCount; i++) {
             var child = GetValidChild(t, i);
-            VisitAndSetCacheData(data, child, t.position, currentLength, totalLength);
+            VisitAndSetCacheData(data, child, position, currentLength, totalLength);
         }
     }
 
