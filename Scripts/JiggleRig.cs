@@ -80,10 +80,20 @@ public class JiggleRig : MonoBehaviour {
         }
         jiggleRigData.UpdateParameters(segment.jiggleTree, parametersCache);
     }
-    
-    public bool GetHasAnimatedParameters => animatedParameters;
 
-    private void OnValidate() {
+        public bool HasAnimatedParameters
+        {
+            get
+            {
+                return animatedParameters;
+            }
+            set
+            {
+                animatedParameters = value;
+            }
+        }
+
+        private void OnValidate() {
         parametersCache ??= new();
         if (!jiggleRigData.hasSerializedData) {
             jiggleRigData = JiggleRigData.Default();

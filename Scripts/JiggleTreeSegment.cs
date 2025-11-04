@@ -25,7 +25,7 @@ public class JiggleTreeSegment {
     }
 
     public void UpdateParametersIfNeeded() {
-        if (behavior.GetHasAnimatedParameters) {
+        if (behavior.HasAnimatedParameters) {
             behavior.UpdateParameters();
         }
     }
