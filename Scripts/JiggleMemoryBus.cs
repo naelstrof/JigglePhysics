@@ -298,7 +298,6 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         inputPosesPrevious = new NativeArray<JiggleTransform>(inputPosesPreviousArray, Allocator.Persistent);
         inputPosesCurrent = new NativeArray<JiggleTransform>(inputPosesCurrentArray, Allocator.Persistent);
         simulateInputPoses = new NativeArray<JiggleTransform>(simulateInputPosesArray, Allocator.Persistent);
-        simulateInputPoses = new NativeArray<JiggleTransform>(simulateInputPosesArray, Allocator.Persistent);
         restPoseTransforms = new NativeArray<JiggleTransform>(restPoseTransformsArray, Allocator.Persistent);
         previousLocalRestPoseTransforms =
             new NativeArray<JiggleTransform>(previousLocalRestPoseTransformsArray, Allocator.Persistent);
