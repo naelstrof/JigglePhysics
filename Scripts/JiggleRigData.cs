@@ -167,7 +167,7 @@ public struct JiggleRigData {
             restLocalPosition = localPosition,
             restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w),
             normalizedDistanceFromRoot = currentLength / totalLength,
-            lossyScale = (scale.x + scale.y + scale.x)/3f,
+            lossyScale = (scale.x + scale.y + scale.z)/3f,
         });
         for (int i = 0; i < validChildrenCount; i++) {
             var child = GetValidChild(t, i);
