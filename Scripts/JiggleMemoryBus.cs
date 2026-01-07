@@ -749,9 +749,20 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
 
             for (int i = 0; i < pendingAddCount; i++) {
                 var jiggleTree = pendingAddTrees[i];
-                var pointCount = (int)pendingAddTrees[i].GetStruct().pointCount;
+                var pointCount = (int)jiggleTree.GetStruct().pointCount;
+                if (pointCount != jiggleTree.bones.Length) {
+                    jiggleTree.SetDirty();
+                    JigglePhysics.SetGlobalDirty();
+                    pendingAddTrees.RemoveAt(i);
+                    pendingAddCount--;
+                    i--;
+                    Debug.LogError("JigglePhysics: Cannot add tree, point count does not match bone count. Attempting to regenerate tree...");
+                    continue;
+                }
                 if (pointCount > JiggleTreeJobData.MAX_POINTS) {
                     pendingAddTrees.RemoveAt(i);
+                    pendingAddCount--;
+                    i--;
                     Debug.LogError("JigglePhysics: Cannot add tree with more than " + JiggleTreeJobData.MAX_POINTS + " points to memory bus.");
                     continue;
                 }
@@ -775,7 +786,8 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
                 if (!TryAddTransformsToSlice(startIndex, jiggleTree)) {
                     memoryFragmenter.Free(startIndex, pointCount);
                     pendingAddTrees.RemoveAt(i);
-                    i=Mathf.Max(i-1,0);
+                    pendingAddCount--;
+                    i--;
                 }
             }
 

@@ -11,12 +11,18 @@ public class JiggleTree {
     public JigglePointParameters[] parameters;
     public Transform[] personalColliderTransforms;
     public JiggleCollider[] personalColliders;
+
+    public event System.Action<JiggleTree> dirtied;
     
     public bool dirty { get; private set; }
     public int rootID { get; private set; }
 
     public void SetDirty() {
+        if (dirty) {
+            return;
+        }
         dirty = true;
+        dirtied?.Invoke(this);
     }
 
     private bool hasJiggleTreeStruct = false;
