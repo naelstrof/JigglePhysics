@@ -207,8 +207,7 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         var newColliders = new JiggleCollider[newColliderCapacity];
         sceneColliderArrayOutput = new JiggleCollider[newColliderCapacity];
         if (sceneColliderArray != null) {
-            System.Array.Copy(sceneColliderArray, newColliders,
-                System.Math.Min(sceneColliderCount, newColliderCapacity));
+            System.Array.Copy(sceneColliderArray, newColliders, System.Math.Min(sceneColliderCount, sceneColliderArray.Length));
         }
         sceneColliderArray = newColliders;
         if (sceneColliders.IsCreated) {
@@ -223,8 +222,7 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         var newColliders = new JiggleCollider[newColliderCapacity];
         personalColliderArrayOutput = new JiggleCollider[newColliderCapacity];
         if (personalColliderArray != null) {
-            System.Array.Copy(personalColliderArray, newColliders,
-                System.Math.Min(personalColliderCount, newColliderCapacity));
+            System.Array.Copy(personalColliderArray, newColliders, System.Math.Min(personalColliderCount, personalColliderArray.Length));
         }
         personalColliderArray = newColliders;
         if (personalColliders.IsCreated) {
@@ -318,8 +316,7 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         jiggleTreeStructsArrayOutput = new JiggleTreeJobData[newTreeCapacity];
 
         if (jiggleTreeStructsArray != null) {
-            System.Array.Copy(jiggleTreeStructsArray, newJiggleTreeStructsArray,
-                System.Math.Min(treeCount, newTreeCapacity));
+            System.Array.Copy(jiggleTreeStructsArray, newJiggleTreeStructsArray, System.Math.Min(treeCount, jiggleTreeStructsArray.Length));
         }
 
         jiggleTreeStructsArray = newJiggleTreeStructsArray;
