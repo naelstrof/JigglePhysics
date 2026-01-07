@@ -782,6 +782,7 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
 
                 if (!TryAddTransformsToSlice(startIndex, jiggleTree)) {
                     memoryFragmenter.Free(startIndex, pointCount);
+                    jiggleTree.SetDirty();
                     pendingAddTrees.RemoveAt(i);
                     pendingAddCount--;
                     i--;
