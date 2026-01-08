@@ -21,8 +21,7 @@ public class JiggleTreeSegment {
         this.behavior = behavior;
         var rig = behavior.GetJiggleRigData();
         transform = rig.rootBone;
-        jiggleTree = JigglePhysics.CreateJiggleTree(rig, null);
-        jiggleTree.dirtied += OnDirty;
+        JigglePhysics.SetGlobalDirty();
     }
 
     private void OnDirty(JiggleTree obj) {
@@ -37,6 +36,11 @@ public class JiggleTreeSegment {
     
 
     public void RegenerateJiggleTreeIfNeeded() {
+        if (jiggleTree == null) {
+            jiggleTree = JigglePhysics.CreateJiggleTree(jiggleRigData, jiggleTree);
+            jiggleTree.dirtied += OnDirty;
+            return;
+        }
         if (jiggleTree.dirty) {
             jiggleTree.dirtied -= OnDirty;
             jiggleTree = JigglePhysics.CreateJiggleTree(jiggleRigData, jiggleTree);
