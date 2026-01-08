@@ -25,6 +25,14 @@ public class JiggleRig : MonoBehaviour {
     public JiggleRigData GetJiggleRigData() => jiggleRigData;
 
     public JiggleTreeInputParameters GetInputParameters() => jiggleRigData.jiggleTreeInputParameters;
+    
+    /// <summary>
+    /// Sets the jiggle tree input parameters, but only locally, to send it to jobs either make sure animatedParameters is true, or call UpdateParameters after you're done making changes.
+    /// </summary>
+    /// <param name="newParameters">The parameters that the jiggles should use to determine their motion.</param>
+    public void SetInputParameters(JiggleTreeInputParameters newParameters) {
+        jiggleRigData.jiggleTreeInputParameters = newParameters;
+    }
 
     #if !JIGGLEPHYSICS_DISABLE_ON_ENABLE
     private void OnEnable() {
@@ -70,9 +78,8 @@ public class JiggleRig : MonoBehaviour {
         jiggleRigData.SnapToRestPose();
     }
     
-
     /// <summary>
-    /// Sends updated parameters to the jiggle tree on the jobs side. Uses the provided list to prevent allocations.
+    /// Sends updated parameters to the jiggle tree on the jobs side.
     /// </summary>
     public void UpdateParameters() {
         if (segment == null || segment.jiggleTree == null) {
@@ -81,19 +88,12 @@ public class JiggleRig : MonoBehaviour {
         jiggleRigData.UpdateParameters(segment.jiggleTree, parametersCache);
     }
 
-        public bool HasAnimatedParameters
-        {
-            get
-            {
-                return animatedParameters;
-            }
-            set
-            {
-                animatedParameters = value;
-            }
-        }
+    public bool HasAnimatedParameters {
+        get => animatedParameters;
+        set => animatedParameters = value;
+    }
 
-        private void OnValidate() {
+    private void OnValidate() {
         parametersCache ??= new();
         if (!jiggleRigData.hasSerializedData) {
             jiggleRigData = JiggleRigData.Default();
