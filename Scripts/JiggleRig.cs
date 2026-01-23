@@ -14,6 +14,7 @@ public class JiggleRig : MonoBehaviour {
     [SerializeField, Tooltip("Whether to check if parameters have been changed each frame.")] private bool animatedParameters = false;
     
     [NonSerialized] private JiggleTreeSegment segment;
+    private bool addedToJiggleTreeSegments = false;
     
     private static List<JigglePointParameters> parametersCache;
 
@@ -36,6 +37,17 @@ public class JiggleRig : MonoBehaviour {
 
     #if !JIGGLEPHYSICS_DISABLE_ON_ENABLE
     private void OnEnable() {
+        OnInitialize();
+    }
+    #endif
+    
+    #if !JIGGLEPHYSICS_DISABLE_ON_DISABLE
+    private void OnDisable() {
+        OnRemove();
+    }
+    #endif
+
+    public void OnInitialize() {
         if (jiggleRigData.rootBone == null) {
             throw new UnityException("Jiggle Rig enabled without a root bone assigned!");
         }
@@ -44,24 +56,17 @@ public class JiggleRig : MonoBehaviour {
 
         segment ??= new JiggleTreeSegment(this);
         segment.SetDirty();
-        JigglePhysics.AddJiggleTreeSegment(segment);
-    }
-    #endif
-    
-    #if !JIGGLEPHYSICS_DISABLE_ON_DISABLE
-    private void OnDisable() {
-        if (segment != null) {
-            JigglePhysics.RemoveJiggleTreeSegment(segment);
+        if (!addedToJiggleTreeSegments) {
+            JigglePhysics.AddJiggleTreeSegment(segment);
+            addedToJiggleTreeSegments = true;
         }
-    }
-    #endif
-
-    public void OnInitialize() {
-        OnEnable();
     }
 
     public void OnRemove() {
-        OnDisable();
+        if (segment != null && addedToJiggleTreeSegments) {
+            JigglePhysics.RemoveJiggleTreeSegment(segment);
+            addedToJiggleTreeSegments = false;
+        }
     }
 
     /// <summary>
