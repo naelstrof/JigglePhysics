@@ -1,7 +1,11 @@
 {
   "name": "com.gator-dragon-games.jigglephysics",
   "displayName": "Jiggle Physics",
-  "version": "15.0.4",
+  "version": "15.0.5",
   "unity": "2022.3",
-  "description": "A jobs-based relativistic squash-and-stretch jiggle physics solution for transforms in Unity."
+  "description": "A jobs-based relativistic squash-and-stretch jiggle physics solution for transforms in Unity.",
+  "dependencies": {
+    "com.unity.mathematics": "1.0.0",
+    "com.unity.collections": "2.0.0"
+  }
 }
