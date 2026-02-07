@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -22,8 +23,18 @@ public struct JiggleJobBulkTransformReset : IJobParallelForTransform {
         previousLocalTransforms = bus.previousLocalRestPoseTransforms;
     }
 
-    private static bool HasNotChanged(float3 oldPosition, Vector3 newPosition, quaternion oldRotation, Quaternion newRotation) {
-        return newPosition == (Vector3)oldPosition && newRotation == (Quaternion)oldRotation;
+    [Flags]
+    private enum ChangeFlags {
+        None = 0,
+        Position = 1,
+        Rotation = 2,
+        PositionAndRotation = 3,
+    }
+    private static ChangeFlags GetChangedFlags(float3 oldPosition, Vector3 newPosition, quaternion oldRotation, Quaternion newRotation) {
+        ChangeFlags changed = ChangeFlags.None;
+        changed |= (newPosition == (Vector3)oldPosition ? ChangeFlags.None : ChangeFlags.Position);
+        changed |= (newRotation == (Quaternion)oldRotation ? ChangeFlags.None : ChangeFlags.Rotation);
+        return changed;
     }
 
     public void Execute(int index, TransformAccess transform) {
@@ -39,12 +50,27 @@ public struct JiggleJobBulkTransformReset : IJobParallelForTransform {
             return;
         }
         
-        if (HasNotChanged(localTransform.position, localPosition, localTransform.rotation, localRotation)) {
-            transform.SetLocalPositionAndRotation(restTransform.position, restTransform.rotation);
-        } else {
-            restTransform.position = localPosition;
-            restTransform.rotation = localRotation;
-            restPoseTransforms[index] = restTransform;
+        switch(GetChangedFlags(localTransform.position, localPosition, localTransform.rotation, localRotation)) {
+            case ChangeFlags.Position:
+                transform.localRotation = restTransform.rotation;
+                restTransform.position = localPosition;
+                restPoseTransforms[index] = restTransform;
+                break;
+            case ChangeFlags.Rotation:
+                transform.localPosition = restTransform.position;
+                restTransform.rotation = localRotation;
+                restPoseTransforms[index] = restTransform;
+                break;
+            case ChangeFlags.PositionAndRotation:
+                restTransform.position = localPosition;
+                restTransform.rotation = localRotation;
+                restPoseTransforms[index] = restTransform;
+                break;
+            case ChangeFlags.None:
+                transform.SetLocalPositionAndRotation(restTransform.position, restTransform.rotation);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(ChangeFlags), "Unknown ChangeFlags (JiggleJobBulkTransformReset), this should never happen.");
         }
     }
 
