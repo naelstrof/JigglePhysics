@@ -4,6 +4,8 @@ using UnityEngine;
 namespace GatorDragonGames.JigglePhysics {
 
 public class JiggleUpdateExample : MonoBehaviour {
+    [Header("OPTIONAL: For debug drawing, import Samples within the Package Manager for URP/HDRP/BuiltIn procedural materials to place here.")]
+    [Space(10)]
     [SerializeField] private bool debugDraw;
     [SerializeField] private Material proceduralMaterial;
     [SerializeField] private Mesh sphereMesh;

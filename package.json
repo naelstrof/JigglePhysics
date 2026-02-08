@@ -7,5 +7,22 @@
   "dependencies": {
     "com.unity.mathematics": "1.0.0",
     "com.unity.collections": "2.0.0"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "URP Debug Procedural Materials",
+      "description": "The URP version of the debug drawing shaders and materials.",
+      "path": "Samples~/ProceduralMaterials/URP"
+    },
+    {
+      "displayName": "HDRP Debug Procedural Materials",
+      "description": "The HDRP version of the debug drawing shaders and materials.",
+      "path": "Samples~/ProceduralMaterials/HDRP"
+    },
+    {
+      "displayName": "Built-In Debug Procedural Materials",
+      "description": "The Built-In version of the debug drawing shaders and materials.",
+      "path": "Samples~/ProceduralMaterials/BuiltIn"
+    }
+  ]
 }

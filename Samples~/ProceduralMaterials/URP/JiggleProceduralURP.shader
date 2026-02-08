@@ -1,6 +1,6 @@
 // Made with Amplify Shader Editor v1.9.9.4
 // Available at the Unity Asset Store - http://u3d.as/y3X 
-Shader "Jiggle/ProceduralPrimitive"
+Shader "Jiggle/ProceduralPrimitiveURP"
 {
 	Properties
 	{
@@ -206,7 +206,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -905,7 +905,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -1247,7 +1247,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -1569,7 +1569,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -1972,7 +1972,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -2536,7 +2536,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -2873,7 +2873,7 @@ Shader "Jiggle/ProceduralPrimitive"
 			#define ASE_ABSOLUTE_VERTEX_POS 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 170100
+			#define ASE_SRP_VERSION -1
 			#define INSTANCEID_SEMANTIC SV_InstanceID
 
 
@@ -3231,7 +3231,7 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Versi
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;237;1248,416;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;238;1248,416;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;MotionVectors;0;10;MotionVectors;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;False;False;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=MotionVectors;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;239;1248,416;Float;False;False;-1;3;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;XRMotionVectors;0;11;XRMotionVectors;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;True;1;False;;255;False;;1;False;;7;False;;3;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;1;LightMode=XRMotionVectors;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;229;1264,256;Float;False;True;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;Jiggle/ProceduralPrimitive;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;21;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;7;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;True;True;2;False;;True;7;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;51;Category;0;0;  Instanced Terrain Normals;1;0;Lighting Model;0;0;Workflow;1;0;Surface;1;638925543571965760;  Keep Alpha;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Alpha Clipping;0;638925548565575920;  Use Shadow Threshold;0;0;Fragment Normal Space;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;0;638925548338220740;Receive Shadows;2;0;Specular Highlights;2;0;Environment Reflections;2;0;Receive SSAO;0;638925552068770870;Motion Vectors;0;638925552076321040;  Add Precomputed Velocity;0;0;  XR Motion Vectors;0;0;GPU Instancing;1;0;LOD CrossFade;0;638925552095255530;Built-in Fog;0;638925552113963970;_FinalColorxAlpha;0;0;Meta Pass;0;638925552143019500;Override Baked GI;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position;0;638924596433759470;Debug Display;1;0;Clear Coat;0;0;0;12;False;True;False;True;False;True;True;True;True;True;False;False;True;;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;229;1264,256;Float;False;True;-1;3;UnityEditor.ShaderGraphLitGUI;0;12;Jiggle/ProceduralPrimitiveURP;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;21;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;7;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;True;True;2;False;;True;7;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;51;Category;0;0;  Instanced Terrain Normals;1;0;Lighting Model;0;0;Workflow;1;0;Surface;1;638925543571965760;  Keep Alpha;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Alpha Clipping;0;638925548565575920;  Use Shadow Threshold;0;0;Fragment Normal Space;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;0;638925548338220740;Receive Shadows;2;0;Specular Highlights;2;0;Environment Reflections;2;0;Receive SSAO;0;638925552068770870;Motion Vectors;0;638925552076321040;  Add Precomputed Velocity;0;0;  XR Motion Vectors;0;0;GPU Instancing;1;0;LOD CrossFade;0;638925552095255530;Built-in Fog;0;638925552113963970;_FinalColorxAlpha;0;0;Meta Pass;0;638925552143019500;Override Baked GI;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position;0;638924596433759470;Debug Display;1;0;Clear Coat;0;0;0;12;False;True;False;True;False;True;True;True;True;True;False;False;True;;False;0
 WireConnection;245;0;24;0
 WireConnection;244;1;24;0
 WireConnection;244;0;245;0
@@ -3252,4 +3252,4 @@ WireConnection;229;6;253;0
 WireConnection;229;8;195;0
 WireConnection;229;10;240;0
 ASEEND*/
-//CHKSM=613269EDF7B7597144298A21D7CB3D74438D4DEB
+//CHKSM=F8FC0343C80AFA5DE87BD0B47F2A408280DCBA12

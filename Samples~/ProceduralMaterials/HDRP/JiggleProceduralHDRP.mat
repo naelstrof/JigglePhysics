@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: JiggleProcedural
+  m_Name: JiggleProceduralHDRP
   m_Shader: {fileID: 4800000, guid: 83a34ddcefa08144c890b4b2383449e0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
