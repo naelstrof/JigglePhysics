@@ -35,7 +35,9 @@ public static class PrefabMenuItems {
             }
 
             string assetPath = AssetDatabase.GenerateUniqueAssetPath(path + $"/{clone.name}.prefab");
-            PrefabUtility.SaveAsPrefabAsset(clone, assetPath);
+            var saved = PrefabUtility.SaveAsPrefabAsset(clone, assetPath);
+            Selection.activeObject = saved;
+            EditorGUIUtility.PingObject(saved);
         } finally {
             Object.DestroyImmediate(clone);
         }

@@ -42,6 +42,9 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
 
         var rootSection = visualElement.Q<VisualElement>("RootSection");
         excludeRootToggleElement.RegisterValueChangedCallback(evt => {
+            if (evt == null || rootSection == null) {
+                return;
+            }
             rootSection.style.display = evt.newValue ? DisplayStyle.None : DisplayStyle.Flex;
         });
 
