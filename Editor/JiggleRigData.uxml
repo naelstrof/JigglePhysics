@@ -1,12 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <Style src="project://database/Packages/com.gator-dragon-games.jigglephysics/Editor/JiggleStyles.uss?fileID=7433441132597879392&amp;guid=9a2f78f6a51166c4ca0e12830ed7e7ab&amp;type=3#JiggleStyles" />
-    <ui:Label text="Jiggle Rig" class="title" />
-    <ui:VisualElement style="height: 10px;" />
-    <uie:ObjectField label="Object Field" name="RootField" />
-    <ui:Toggle label="Toggle" name="ExcludeRootToggle" />
-    <uie:PropertyField name="IgnoredTransformsField" />
-    <ui:VisualElement name="PersonalColliderWarning" />
-    <uie:PropertyField name="PersonalCollidersField" />
-    <ui:VisualElement style="height: 10px;" />
-    <ui:VisualElement name="Contents" style="flex-grow: 1;" />
+    <Style src="project://database/Packages/com.gator-dragon-games.jigglephysics/Editor/JiggleStyles.uss?fileID=7433441132597879392&amp;guid=9a2f78f6a51166c4ca0e12830ed7e7ab&amp;type=3#JiggleStyles"/>
+    <ui:Label text="Jiggle Rig" class="title"/>
+    <ui:VisualElement style="height: 10px;"/>
+    <uie:ObjectField label="Object Field" name="RootField"/>
+    <ui:Toggle label="Toggle" name="ExcludeRootToggle"/>
+    <uie:PropertyField name="IgnoredTransformsField"/>
+    <ui:VisualElement name="PersonalColliderWarning"/>
+    <uie:PropertyField name="PersonalCollidersField"/>
+    <ui:VisualElement style="height: 10px;"/>
+    <ui:VisualElement name="Contents" style="flex-grow: 1;">
+        <uie:PropertyField name="JiggleTreeInputParameters"/>
+    </ui:VisualElement>
 </ui:UXML>

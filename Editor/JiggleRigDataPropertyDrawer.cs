@@ -9,10 +9,12 @@ namespace GatorDragonGames.JigglePhysics {
 [CustomPropertyDrawer(typeof(JiggleRigData))]
 public class JiggleRigDataPropertyDrawer : PropertyDrawer {
     public override VisualElement CreatePropertyGUI(SerializedProperty property) {
-        var visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(AssetDatabase.GUIDToAssetPath("3b91b5cf6b975bd4d83d8a940258c420"));
+        var visualTreeAsset =
+            AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                AssetDatabase.GUIDToAssetPath("3b91b5cf6b975bd4d83d8a940258c420"));
         var visualElement = new VisualElement();
         visualTreeAsset.CloneTree(visualElement);
-        
+
         var rootElement = visualElement.Q<ObjectField>("RootField");
         rootElement.objectType = typeof(Transform);
         var rootProp = property.FindPropertyRelative(nameof(JiggleRigData.rootBone));
@@ -21,19 +23,23 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
 
         var excludeRootToggleElement = visualElement.Q<Toggle>("ExcludeRootToggle");
         excludeRootToggleElement.BindProperty(property.FindPropertyRelative(nameof(JiggleRigData.excludeRoot)));
-        excludeRootToggleElement.Q<Label>().text = "Motionless Root";    
-        excludeRootToggleElement.tooltip = "Exclude the root from the jiggle simulation. Use this to coalesce many branching jiggles.";
+        excludeRootToggleElement.Q<Label>().text = "Motionless Root";
+        excludeRootToggleElement.tooltip =
+            "Exclude the root from the jiggle simulation. Use this to coalesce many branching jiggles.";
 
         var excludedTransformsElement = visualElement.Q<PropertyField>("IgnoredTransformsField");
         excludedTransformsElement.BindProperty(property.FindPropertyRelative(nameof(JiggleRigData.excludedTransforms)));
 
         var personalCollidersElement = visualElement.Q<PropertyField>("PersonalCollidersField");
         personalCollidersElement.BindProperty(property.FindPropertyRelative(nameof(JiggleRigData.jiggleColliders)));
-        
+
         var container = visualElement.Q<VisualElement>("Contents");
-        var rig = (JiggleRigData)property.boxedValue;
-        container.Add(rig.GetInspectorVisualElement(property.FindPropertyRelative(nameof(JiggleRigData.jiggleTreeInputParameters))));
-        
+        //var rig = (JiggleRigData)property.boxedValue;
+
+        var inputParams = visualElement.Q<PropertyField>("JiggleTreeInputParameters");
+        inputParams.BindProperty(property.FindPropertyRelative(nameof(JiggleRigData.jiggleTreeInputParameters)));
+        container.Add(inputParams);
+
         var rootSection = visualElement.Q<VisualElement>("RootSection");
         excludeRootToggleElement.RegisterValueChangedCallback(evt => {
             rootSection.style.display = evt.newValue ? DisplayStyle.None : DisplayStyle.Flex;
@@ -43,7 +49,8 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
         if (!property.serializedObject.isEditingMultipleObjects && Application.isPlaying) {
             var rootBone = (Transform)rootProp.objectReferenceValue;
             var isRecursiveRig = false;
-            foreach (JiggleRig otherRig in Object.FindObjectsByType<JiggleRig>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)) {
+            foreach (JiggleRig otherRig in Object.FindObjectsByType<JiggleRig>(FindObjectsInactive.Exclude,
+                         FindObjectsSortMode.None)) {
                 var otherRoot = otherRig.GetJiggleRigData().rootBone;
                 if (rootBone != otherRoot && rootBone.IsChildOf(otherRoot)) {
                     isRecursiveRig = true;
@@ -53,23 +60,27 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
 
             if (isRecursiveRig) {
                 recursiveWarning.style.display = DisplayStyle.Flex;
-                var warningText = "Recursive rigs ignore colliders as they get merged with their parent rig. If colliders are needed, add them to the parent rig instead.";
+                var warningText =
+                    "Recursive rigs ignore colliders as they get merged with their parent rig. If colliders are needed, add them to the parent rig instead.";
                 HelpBox helpBox = new HelpBox(warningText, HelpBoxMessageType.Warning);
                 recursiveWarning.Add(helpBox);
-            } else {
+            }
+            else {
                 recursiveWarning.style.display = DisplayStyle.None;
             }
-        } else {
+        }
+        else {
             recursiveWarning.style.display = DisplayStyle.None;
         }
 
         return visualElement;
     }
-    
+
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
         EditorGUI.LabelField(position, "Jiggle Physics doesn't support IMGUI inspectors, sorry!");
     }
 }
 
 }
+
 #endif
