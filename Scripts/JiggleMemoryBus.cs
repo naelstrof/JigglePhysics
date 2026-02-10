@@ -632,8 +632,8 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
                 return;
             }
 
-            if (sceneColliderCount + pendingRemoveSceneColliderCount <= sceneColliderCapacity) {
-                ResizeSceneColliderCapacity(Mathf.NextPowerOfTwo(sceneColliderCount+pendingRemoveSceneColliderCount));
+            if (sceneColliderCount + pendingAddSceneColliderCount >= sceneColliderCapacity) {
+                ResizeSceneColliderCapacity(Mathf.NextPowerOfTwo(sceneColliderCount+pendingAddSceneColliderCount+1));
             }
             
             for (int i = 0; i < pendingRemoveSceneColliderCount; i++) {
@@ -701,19 +701,19 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
 
             if (transformCount + newTransforms >= transformCapacity) {
                 ReadIn();
-                ResizeTransformCapacity(Mathf.NextPowerOfTwo(transformCount+newTransforms));
+                ResizeTransformCapacity(Mathf.NextPowerOfTwo(transformCount+newTransforms+1));
                 WriteOut();
                 return;
             }
             if (treeCount + newTrees >= treeCapacity) {
                 ReadIn();
-                ResizeTreeCapacity(Mathf.NextPowerOfTwo(treeCount+newTrees));
+                ResizeTreeCapacity(Mathf.NextPowerOfTwo(treeCount+newTrees+1));
                 WriteOut();
                 return;
             }
             if (personalColliderCount + newPersonalColliders >= personalColliderCapacity) {
                 ReadIn();
-                ResizePersonalColliderCapacity(Mathf.NextPowerOfTwo(personalColliderCount+newPersonalColliders));
+                ResizePersonalColliderCapacity(Mathf.NextPowerOfTwo(personalColliderCount+newPersonalColliders+1));
                 WriteOut();
                 return;
             }
