@@ -9,23 +9,17 @@ using UnityEditor;
 
 namespace GatorDragonGames.JigglePhysics {
 
-public class JiggleRig : MonoBehaviour {
+public class JiggleRig : MonoBehaviour, IJiggleParameterProvider {
     [SerializeField] private JiggleRigData jiggleRigData;
     [SerializeField, Tooltip("Whether to check if parameters have been changed each frame.")] private bool animatedParameters = false;
     
     [NonSerialized] private JiggleTreeSegment segment;
     private bool addedToJiggleTreeSegments = false;
-    
-    private static List<JigglePointParameters> parametersCache;
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void Initialize() {
-        parametersCache = new();
-    }
 
     public JiggleRigData GetJiggleRigData() => jiggleRigData;
 
     public JiggleTreeInputParameters GetInputParameters() => jiggleRigData.jiggleTreeInputParameters;
+    
     
     /// <summary>
     /// Sets the jiggle tree input parameters, but only locally, to send it to jobs either make sure animatedParameters is true, or call UpdateParameters after you're done making changes.
@@ -87,10 +81,10 @@ public class JiggleRig : MonoBehaviour {
     /// Sends updated parameters to the jiggle tree on the jobs side.
     /// </summary>
     public void UpdateParameters() {
-        if (segment == null || segment.jiggleTree == null) {
+        if (segment == null) {
             return;
         }
-        jiggleRigData.UpdateParameters(segment.jiggleTree, parametersCache);
+        segment.UpdateParameters();
     }
 
     public bool HasAnimatedParameters {
@@ -99,7 +93,6 @@ public class JiggleRig : MonoBehaviour {
     }
 
     private void OnValidate() {
-        parametersCache ??= new();
         if (!jiggleRigData.hasSerializedData) {
             jiggleRigData = JiggleRigData.Default();
         }

@@ -192,14 +192,13 @@ public class JiggleJobs {
             OnFinishSimulate?.Invoke(this, simulateTime);
         }
 
-
         _memoryBus.RotateBuffers();
         jobInterpolation.previousTimeStamp = jobInterpolation.timeStamp;
         jobInterpolation.timeStamp = jobSimulate.timeStamp;
         jobInputInterpolation.previousTimeStamp = jobInputInterpolation.timeStamp;
         jobInputInterpolation.timeStamp = realTime;
         jobInputInterpolation.currentTime = simulateTime;
-
+        
         _memoryBus.CommitTrees();
         _memoryBus.CommitColliders();
 
@@ -229,8 +228,12 @@ public class JiggleJobs {
         hasHandleBroadPhaseClear = true;
         handleBroadPhase = jobBroadPhase.Schedule(JobHandle.CombineDependencies(colliderHandles, handleBroadPhaseClear));
         hasHandleBroadPhase = true;
-        
-        handleBulkReset = jobBulkTransformReset.Schedule(_memoryBus.GetTransformAccessArray(), colliderHandles);
+
+        if (hasHandleTransformWrite) {
+            handleBulkReset = jobBulkTransformReset.Schedule(_memoryBus.GetTransformAccessArray(), JobHandle.CombineDependencies(colliderHandles, handleTransformWrite));
+        } else {
+            handleBulkReset = jobBulkTransformReset.Schedule(_memoryBus.GetTransformAccessArray(), colliderHandles);
+        }
         hasHandleBulkReset = true;
 
         handleBulkRead = jobBulkTransformRead.ScheduleReadOnly(_memoryBus.GetTransformAccessArray(), 128, handleBulkReset);

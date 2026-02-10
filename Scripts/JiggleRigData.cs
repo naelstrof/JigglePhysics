@@ -153,7 +153,7 @@ public struct JiggleRigData {
         RegenerateCacheLookup();
     }
     
-    public void VisitAndSetCacheData(List<JiggleTransformCachedData> data, Transform t, Vector3 lastPosition, float currentLength, float totalLength) {
+    private void VisitAndSetCacheData(List<JiggleTransformCachedData> data, Transform t, Vector3 lastPosition, float currentLength, float totalLength) {
         if (GetIsExcluded(t)) {
             return;
         }
@@ -245,7 +245,7 @@ public struct JiggleRigData {
     public static JiggleRigData Default() {
         return new JiggleRigData {
             rootBone = null,
-            serializedVersion = "v0.0.0",
+            serializedVersion = "v0.0.2",
             hasSerializedData = true,
             excludeRoot = false,
             jiggleTreeInputParameters = JiggleTreeInputParameters.Default(),
