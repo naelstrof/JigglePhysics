@@ -389,7 +389,8 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         ReadIn(simulationOutputPoseData, simulationOutputPoseDataArray, transformCount);
         ReadIn(interpolationCurrentPoseData, interpolationCurrentPoseDataArray, transformCount);
         ReadIn(interpolationPreviousPoseData, interpolationPreviousPoseDataArray, transformCount);
-        ReadIn(personalColliders, personalColliderArray, personalColliderCount);
+        // These get set at AddTransformsToSlice, which is too early, don't read them in because they'll be zeros...
+        //ReadIn(personalColliders, personalColliderArray, personalColliderCount);
         Profiler.EndSample();
     }
 
