@@ -286,37 +286,50 @@ public struct JiggleJobSimulate : IJobFor {
                 break;
             }
             case JiggleCollider.JiggleColliderType.Box: {
-                var hardness = 1f;
                 var pointPosition = point->workingPosition;
                 var pointRadius = point->worldRadius;
                 var worldToLocal = math.inverse(collider.localToWorldMatrix);
                 var localPoint = math.transform(worldToLocal, pointPosition);
                 var extents = collider.boxExtents;
-                var inflatedExtents = extents + new float3(pointRadius / math.length(collider.localToWorldMatrix.c0.xyz),
-                                                            pointRadius / math.length(collider.localToWorldMatrix.c1.xyz),
-                                                            pointRadius / math.length(collider.localToWorldMatrix.c2.xyz));
-                // Check if point is inside the inflated box
-                if (math.abs(localPoint.x) > inflatedExtents.x ||
-                    math.abs(localPoint.y) > inflatedExtents.y ||
-                    math.abs(localPoint.z) > inflatedExtents.z) {
+                var inside = math.all(math.abs(localPoint) < extents);
+                float3 closestLocal;
+                if (inside) {
+                    // Project from box center through the point onto the box surface.
+                    // This gives a continuous surface point that smoothly transitions
+                    // around edges and corners instead of snapping between faces.
+                    var absPoint = math.max(math.abs(localPoint), new float3(1e-6f));
+                    var t = extents / absPoint;
+                    var tMin = math.cmin(t);
+                    closestLocal = localPoint * tMin;
+                } else {
+                    closestLocal = math.clamp(localPoint, -extents, extents);
+                }
+                // Transform closest point back to world space using the full matrix (preserves scale)
+                var closestWorld = math.transform(collider.localToWorldMatrix, closestLocal);
+                var diff = pointPosition - closestWorld;
+                var dist = math.length(diff);
+                if (!inside && dist > pointRadius) {
                     return float3.zero;
                 }
-                // Find the axis with minimum penetration depth
-                var penetrationX = inflatedExtents.x - math.abs(localPoint.x);
-                var penetrationY = inflatedExtents.y - math.abs(localPoint.y);
-                var penetrationZ = inflatedExtents.z - math.abs(localPoint.z);
-                float3 localDepenetration;
-                if (penetrationX <= penetrationY && penetrationX <= penetrationZ) {
-                    localDepenetration = new float3(math.sign(localPoint.x) * penetrationX, 0f, 0f);
-                } else if (penetrationY <= penetrationX && penetrationY <= penetrationZ) {
-                    localDepenetration = new float3(0f, math.sign(localPoint.y) * penetrationY, 0f);
+                float3 worldDepenetration;
+                if (dist < 1e-6f) {
+                    // Point is exactly at the box center or on the surface, use the nearest face normal
+                    var penetration = extents - math.abs(localPoint);
+                    float3 localNormal;
+                    if (penetration.x <= penetration.y && penetration.x <= penetration.z) {
+                        localNormal = new float3(math.sign(localPoint.x), 0f, 0f);
+                    } else if (penetration.y <= penetration.z) {
+                        localNormal = new float3(0f, math.sign(localPoint.y), 0f);
+                    } else {
+                        localNormal = new float3(0f, 0f, math.sign(localPoint.z));
+                    }
+                    var worldNormal = math.normalize(math.rotate(collider.localToWorldMatrix, localNormal));
+                    worldDepenetration = worldNormal * pointRadius;
+                } else if (inside) {
+                    worldDepenetration = -diff + math.normalize(-diff) * pointRadius;
                 } else {
-                    localDepenetration = new float3(0f, 0f, math.sign(localPoint.z) * penetrationZ);
+                    worldDepenetration = math.normalize(diff) * (pointRadius - dist);
                 }
-                // Transform depenetration back to world space (rotation only)
-                var worldDepenetration = math.rotate(collider.localToWorldMatrix, localDepenetration);
-                // Scale by axis lengths to account for non-uniform scale
-                worldDepenetration *= hardness;
                 if (!(otherPointParameters->angleElasticity == 1f
                       && otherPointParameters->rootElasticity == 1f
                       && otherPointParameters->lengthElasticity == 1f)) {
