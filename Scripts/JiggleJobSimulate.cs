@@ -178,7 +178,7 @@ public struct JiggleJobSimulate : IJobFor {
             return new float3(0f, 0f, 0f);
         }
         switch (collider.type) {
-            case JiggleCollider.JiggleColliderType.Sphere:
+            case JiggleCollider.JiggleColliderType.Sphere: {
                 var hardness = 1f;
                 var colliderPosition = collider.localToWorldMatrix.c3.xyz;
                 var pointPosition = point->workingPosition;
@@ -221,8 +221,163 @@ public struct JiggleJobSimulate : IJobFor {
                     return depenetrationVector;
                 }
                 break;
+            }
+            case JiggleCollider.JiggleColliderType.Capsule: {
+                var hardness = 1f;
+                var colliderPosition = collider.localToWorldMatrix.c3.xyz;
+                var colliderUp = collider.GetWorldAxis();
+                var halfHeight = collider.worldHeight * 0.5f;
+                var capsuleA = colliderPosition - colliderUp * halfHeight;
+                var capsuleB = colliderPosition + colliderUp * halfHeight;
+                var pointPosition = point->workingPosition;
+                var otherPosition = otherPoint->workingPosition;
+                var pointRadius = point->worldRadius;
+                var colliderRadius = collider.worldRadius;
+                var combinedRadius = pointRadius + colliderRadius;
+                // Find closest points between capsule axis and bone segment
+                ClosestPointsOnTwoSegments(capsuleA, capsuleB, pointPosition, otherPosition, out var closestOnCapsule, out var closestOnBone, out var tValueBone);
+                var cap_diff = closestOnBone - closestOnCapsule;
+                var cap_distance = math.length(cap_diff);
+                var cap_depenetrationMagnitude = combinedRadius - cap_distance;
+                if (cap_depenetrationMagnitude <= 0f) {
+                    return float3.zero;
+                }
+                var cap_depenetrationDir = math.normalizesafe(cap_diff, new float3(0, 0, 1));
+                var cap_depenetrationVector = cap_depenetrationDir * cap_depenetrationMagnitude;
+                var cap_pValue = math.clamp(2f - tValueBone * 2f, 0f, 1f);
+                cap_depenetrationVector *= hardness * cap_pValue;
+                // Point-to-capsule direct check
+                ClosestPointOnSegment(pointPosition, capsuleA, capsuleB, out var closestOnCapsuleToPoint);
+                cap_diff = pointPosition - closestOnCapsuleToPoint;
+                cap_distance = math.length(cap_diff);
+                cap_depenetrationMagnitude = combinedRadius - cap_distance;
+                if (cap_depenetrationMagnitude > 0f) {
+                    cap_depenetrationDir = math.normalizesafe(cap_diff, new float3(0, 0, 1));
+                    var cap_depenetrationVector2 = cap_depenetrationDir * cap_depenetrationMagnitude;
+                    cap_depenetrationVector2 *= hardness;
+                    var mag1 = math.length(cap_depenetrationVector);
+                    var mag2 = math.length(cap_depenetrationVector2);
+                    cap_depenetrationVector = (cap_depenetrationVector + cap_depenetrationVector2) * 0.5f;
+                    cap_depenetrationVector = math.normalizesafe(cap_depenetrationVector, new float3(0, 0, 1)) * math.max(mag1, mag2);
+                }
+                if (!(otherPointParameters->angleElasticity == 1f
+                      && otherPointParameters->rootElasticity == 1f
+                      && otherPointParameters->lengthElasticity == 1f)) {
+                    return cap_depenetrationVector;
+                }
+                break;
+            }
+            case JiggleCollider.JiggleColliderType.Plane: {
+                var colliderPosition = collider.localToWorldMatrix.c3.xyz;
+                var planeNormal = math.normalizesafe(collider.localToWorldMatrix.c1.xyz, new float3(0, 1, 0));
+                var pointPosition = point->workingPosition;
+                var pointRadius = point->worldRadius;
+                var signedDistance = math.dot(pointPosition - colliderPosition, planeNormal);
+                var penetration = pointRadius - signedDistance;
+                if (penetration <= 0f) {
+                    return float3.zero;
+                }
+                var plane_depenetrationVector = planeNormal * penetration;
+                if (!(otherPointParameters->angleElasticity == 1f
+                      && otherPointParameters->rootElasticity == 1f
+                      && otherPointParameters->lengthElasticity == 1f)) {
+                    return plane_depenetrationVector;
+                }
+                break;
+            }
+            case JiggleCollider.JiggleColliderType.Box: {
+                var hardness = 1f;
+                var pointPosition = point->workingPosition;
+                var pointRadius = point->worldRadius;
+                var worldToLocal = math.inverse(collider.localToWorldMatrix);
+                var localPoint = math.transform(worldToLocal, pointPosition);
+                var extents = collider.boxExtents;
+                var inflatedExtents = extents + new float3(pointRadius / math.length(collider.localToWorldMatrix.c0.xyz),
+                                                            pointRadius / math.length(collider.localToWorldMatrix.c1.xyz),
+                                                            pointRadius / math.length(collider.localToWorldMatrix.c2.xyz));
+                // Check if point is inside the inflated box
+                if (math.abs(localPoint.x) > inflatedExtents.x ||
+                    math.abs(localPoint.y) > inflatedExtents.y ||
+                    math.abs(localPoint.z) > inflatedExtents.z) {
+                    return float3.zero;
+                }
+                // Find the axis with minimum penetration depth
+                var penetrationX = inflatedExtents.x - math.abs(localPoint.x);
+                var penetrationY = inflatedExtents.y - math.abs(localPoint.y);
+                var penetrationZ = inflatedExtents.z - math.abs(localPoint.z);
+                float3 localDepenetration;
+                if (penetrationX <= penetrationY && penetrationX <= penetrationZ) {
+                    localDepenetration = new float3(math.sign(localPoint.x) * penetrationX, 0f, 0f);
+                } else if (penetrationY <= penetrationX && penetrationY <= penetrationZ) {
+                    localDepenetration = new float3(0f, math.sign(localPoint.y) * penetrationY, 0f);
+                } else {
+                    localDepenetration = new float3(0f, 0f, math.sign(localPoint.z) * penetrationZ);
+                }
+                // Transform depenetration back to world space (rotation only)
+                var worldDepenetration = math.rotate(collider.localToWorldMatrix, localDepenetration);
+                // Scale by axis lengths to account for non-uniform scale
+                worldDepenetration *= hardness;
+                if (!(otherPointParameters->angleElasticity == 1f
+                      && otherPointParameters->rootElasticity == 1f
+                      && otherPointParameters->lengthElasticity == 1f)) {
+                    return worldDepenetration;
+                }
+                break;
+            }
         }
         return new float3(0f, 0f, 0f);
+    }
+
+    private void ClosestPointOnSegment(float3 point, float3 segA, float3 segB, out float3 closest) {
+        var ab = segB - segA;
+        var lengthSq = math.dot(ab, ab);
+        if (lengthSq == 0f) {
+            closest = segA;
+            return;
+        }
+        var t = math.clamp(math.dot(point - segA, ab) / lengthSq, 0f, 1f);
+        closest = segA + t * ab;
+    }
+
+    private void ClosestPointsOnTwoSegments(float3 a0, float3 a1, float3 b0, float3 b1, out float3 closestA, out float3 closestB, out float tB) {
+        var d1 = a1 - a0;
+        var d2 = b1 - b0;
+        var r = a0 - b0;
+        var a = math.dot(d1, d1);
+        var e = math.dot(d2, d2);
+        var f = math.dot(d2, r);
+        float s, t;
+        if (a <= 1e-8f && e <= 1e-8f) {
+            s = 0f; t = 0f;
+        } else if (a <= 1e-8f) {
+            s = 0f;
+            t = math.clamp(f / e, 0f, 1f);
+        } else {
+            var c = math.dot(d1, r);
+            if (e <= 1e-8f) {
+                t = 0f;
+                s = math.clamp(-c / a, 0f, 1f);
+            } else {
+                var b = math.dot(d1, d2);
+                var denom = a * e - b * b;
+                if (denom != 0f) {
+                    s = math.clamp((b * f - c * e) / denom, 0f, 1f);
+                } else {
+                    s = 0f;
+                }
+                t = (b * s + f) / e;
+                if (t < 0f) {
+                    t = 0f;
+                    s = math.clamp(-c / a, 0f, 1f);
+                } else if (t > 1f) {
+                    t = 1f;
+                    s = math.clamp((b - c) / a, 0f, 1f);
+                }
+            }
+        }
+        closestA = a0 + d1 * s;
+        closestB = b0 + d2 * t;
+        tB = t;
     }
     
     private float3 GetClosestPointOnLineSegment(float3 inputPoint, float3 segmentPoint1, float3 segmentPoint2, out float tValue) {
