@@ -60,13 +60,6 @@ public struct JiggleColliderSerializable {
                 Gizmos.DrawLine(position, position + upDir * size * 0.5f);
             }
             break;
-            case JiggleCollider.JiggleColliderType.Box: {
-                var oldMatrix = Gizmos.matrix;
-                Gizmos.matrix = transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(Vector3.zero, (Vector3)(collider.boxExtents * 2f));
-                Gizmos.matrix = oldMatrix;
-            }
-            break;
         }
     }
 }
@@ -76,8 +69,7 @@ public struct JiggleCollider {
     public enum JiggleColliderType {
         Sphere,
         Capsule,
-        Plane,
-        Box
+        Plane
     }
 
     public enum CapsuleAxis {
@@ -97,9 +89,6 @@ public struct JiggleCollider {
     [NonSerialized] public float worldHeight;
 
     public CapsuleAxis capsuleAxis;
-
-    public float3 boxExtents;
-    [NonSerialized] public float3 worldBoxExtents;
 
     [NonSerialized] public float4x4 localToWorldMatrix;
     private float AverageScale(float4x4 matrix) {
@@ -130,11 +119,6 @@ public struct JiggleCollider {
         var averageScale = AverageScale(localToWorldMatrix);
         worldRadius = math.max(0f, radius) * averageScale;
         worldHeight = math.max(0f, height) * averageScale;
-        worldBoxExtents = new float3(
-            math.max(0f, boxExtents.x) * math.length(matrix.c0.xyz),
-            math.max(0f, boxExtents.y) * math.length(matrix.c1.xyz),
-            math.max(0f, boxExtents.z) * math.length(matrix.c2.xyz)
-        );
     }
 }
 

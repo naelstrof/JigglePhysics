@@ -115,14 +115,6 @@ public struct JiggleJobBroadPhase : IJob {
                     // Planes are infinite, always go into the global cell
                     aabbExtent = new float3(GLOBAL_COLLIDER_EDGE_LENGTH + 1);
                     break;
-                case JiggleCollider.JiggleColliderType.Box: {
-                    // Compute world AABB from oriented box
-                    var c0 = math.abs(collider.localToWorldMatrix.c0.xyz) * collider.boxExtents.x;
-                    var c1 = math.abs(collider.localToWorldMatrix.c1.xyz) * collider.boxExtents.y;
-                    var c2 = math.abs(collider.localToWorldMatrix.c2.xyz) * collider.boxExtents.z;
-                    aabbExtent = c0 + c1 + c2;
-                    break;
-                }
                 default: // Sphere
                     aabbExtent = new float3(collider.worldRadius);
                     break;

@@ -19,9 +19,6 @@ public class JiggleColliderPropertyDrawer : PropertyDrawer {
             case JiggleCollider.JiggleColliderType.Plane:
                 lines = 1; // type only
                 break;
-            case JiggleCollider.JiggleColliderType.Box:
-                lines = 2; // type, boxExtents
-                break;
         }
         return lines * (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
     }
@@ -33,8 +30,6 @@ public class JiggleColliderPropertyDrawer : PropertyDrawer {
         var radiusProp = property.FindPropertyRelative("radius");
         var heightProp = property.FindPropertyRelative("height");
         var capsuleAxisProp = property.FindPropertyRelative("capsuleAxis");
-        var boxExtentsProp = property.FindPropertyRelative("boxExtents");
-
         var lineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         var rect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
 
@@ -57,9 +52,6 @@ public class JiggleColliderPropertyDrawer : PropertyDrawer {
             case JiggleCollider.JiggleColliderType.Plane:
                 // No extra fields
                 break;
-            case JiggleCollider.JiggleColliderType.Box:
-                ClampedVector3Field(rect, boxExtentsProp, "Half Extents");
-                break;
         }
 
         EditorGUI.EndProperty();
@@ -72,15 +64,6 @@ public class JiggleColliderPropertyDrawer : PropertyDrawer {
         }
     }
 
-    private void ClampedVector3Field(Rect rect, SerializedProperty prop, string label) {
-        EditorGUI.PropertyField(rect, prop, new GUIContent(label));
-        var x = prop.FindPropertyRelative("x");
-        var y = prop.FindPropertyRelative("y");
-        var z = prop.FindPropertyRelative("z");
-        if (x.floatValue < 0f) x.floatValue = 0f;
-        if (y.floatValue < 0f) y.floatValue = 0f;
-        if (z.floatValue < 0f) z.floatValue = 0f;
-    }
 }
 
 }
