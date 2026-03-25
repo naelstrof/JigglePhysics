@@ -286,59 +286,81 @@ public struct JiggleJobSimulate : IJobFor {
                 break;
             }
             case JiggleCollider.JiggleColliderType.Box: {
+                var hardness = 1f;
                 var pointPosition = point->workingPosition;
+                var otherPosition = otherPoint->workingPosition;
                 var pointRadius = point->worldRadius;
                 var worldToLocal = math.inverse(collider.localToWorldMatrix);
-                var localPoint = math.transform(worldToLocal, pointPosition);
                 var extents = collider.boxExtents;
-                var inside = math.all(math.abs(localPoint) < extents);
-                float3 closestLocal;
-                if (inside) {
-                    // Project from box center through the point onto the box surface.
-                    // This gives a continuous surface point that smoothly transitions
-                    // around edges and corners instead of snapping between faces.
-                    var absPoint = math.max(math.abs(localPoint), new float3(1e-6f));
-                    var t = extents / absPoint;
-                    var tMin = math.cmin(t);
-                    closestLocal = localPoint * tMin;
-                } else {
-                    closestLocal = math.clamp(localPoint, -extents, extents);
-                }
-                // Transform closest point back to world space using the full matrix (preserves scale)
-                var closestWorld = math.transform(collider.localToWorldMatrix, closestLocal);
-                var diff = pointPosition - closestWorld;
-                var dist = math.length(diff);
-                if (!inside && dist > pointRadius) {
+                // Find closest point on the bone segment to the box surface
+                var boneClosest = GetClosestPointOnLineSegment(
+                    collider.localToWorldMatrix.c3.xyz,
+                    pointPosition,
+                    otherPosition,
+                    out var tValue
+                );
+                var segDepenetration = BoxDepenetrate(boneClosest, worldToLocal, collider.localToWorldMatrix, extents, pointRadius);
+                var segDepenetrationLen = math.length(segDepenetration);
+                if (segDepenetrationLen <= 0f) {
                     return float3.zero;
                 }
-                float3 worldDepenetration;
-                if (dist < 1e-6f) {
-                    // Point is exactly at the box center or on the surface, use the nearest face normal
-                    var penetration = extents - math.abs(localPoint);
-                    float3 localNormal;
-                    if (penetration.x <= penetration.y && penetration.x <= penetration.z) {
-                        localNormal = new float3(math.sign(localPoint.x), 0f, 0f);
-                    } else if (penetration.y <= penetration.z) {
-                        localNormal = new float3(0f, math.sign(localPoint.y), 0f);
-                    } else {
-                        localNormal = new float3(0f, 0f, math.sign(localPoint.z));
-                    }
-                    var worldNormal = math.normalize(math.rotate(collider.localToWorldMatrix, localNormal));
-                    worldDepenetration = worldNormal * pointRadius;
-                } else if (inside) {
-                    worldDepenetration = -diff + math.normalize(-diff) * pointRadius;
-                } else {
-                    worldDepenetration = math.normalize(diff) * (pointRadius - dist);
+                var pValue = math.clamp(2f - tValue * 2f, 0f, 1f);
+                segDepenetration *= hardness * pValue;
+                // Also check the point directly against the box and blend
+                var pointDepenetration = BoxDepenetrate(pointPosition, worldToLocal, collider.localToWorldMatrix, extents, pointRadius);
+                var pointDepenetrationLen = math.length(pointDepenetration);
+                if (pointDepenetrationLen > 0f) {
+                    pointDepenetration *= hardness;
+                    var mag1 = math.length(segDepenetration);
+                    var mag2 = pointDepenetrationLen;
+                    segDepenetration = (segDepenetration + pointDepenetration) * 0.5f;
+                    segDepenetration = math.normalizesafe(segDepenetration, new float3(0, 0, 1)) * math.max(mag1, mag2);
                 }
                 if (!(otherPointParameters->angleElasticity == 1f
                       && otherPointParameters->rootElasticity == 1f
                       && otherPointParameters->lengthElasticity == 1f)) {
-                    return worldDepenetration;
+                    return segDepenetration;
                 }
                 break;
             }
         }
         return new float3(0f, 0f, 0f);
+    }
+
+    private float3 BoxDepenetrate(float3 worldPoint, float4x4 worldToLocal, float4x4 localToWorld, float3 extents, float radius) {
+        var localPoint = math.transform(worldToLocal, worldPoint);
+        var inside = math.all(math.abs(localPoint) < extents);
+        float3 closestLocal;
+        if (inside) {
+            var absPoint = math.max(math.abs(localPoint), new float3(1e-6f));
+            var t = extents / absPoint;
+            var tMin = math.cmin(t);
+            closestLocal = localPoint * tMin;
+        } else {
+            closestLocal = math.clamp(localPoint, -extents, extents);
+        }
+        var closestWorld = math.transform(localToWorld, closestLocal);
+        var diff = worldPoint - closestWorld;
+        var dist = math.length(diff);
+        if (!inside && dist > radius) {
+            return float3.zero;
+        }
+        if (dist < 1e-6f) {
+            var penetration = extents - math.abs(localPoint);
+            float3 localNormal;
+            if (penetration.x <= penetration.y && penetration.x <= penetration.z) {
+                localNormal = new float3(math.sign(localPoint.x), 0f, 0f);
+            } else if (penetration.y <= penetration.z) {
+                localNormal = new float3(0f, math.sign(localPoint.y), 0f);
+            } else {
+                localNormal = new float3(0f, 0f, math.sign(localPoint.z));
+            }
+            return math.normalize(math.rotate(localToWorld, localNormal)) * radius;
+        }
+        if (inside) {
+            return -diff + math.normalize(-diff) * radius;
+        }
+        return math.normalize(diff) * (radius - dist);
     }
 
     private void ClosestPointOnSegment(float3 point, float3 segA, float3 segB, out float3 closest) {
