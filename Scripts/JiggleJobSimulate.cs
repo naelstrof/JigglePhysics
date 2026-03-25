@@ -93,7 +93,7 @@ public struct JiggleJobSimulate : IJobFor {
                 point.pose = inputPose.position;
                 point.parentPose = parent.pose;
                 point.desiredLengthToParent = math.distance(point.pose, parent.pose);
-                var averagePointScale = (inputPose.scale.x + inputPose.scale.y + inputPose.scale.z) / 3f;
+                var averagePointScale = (math.abs(inputPose.scale.x) + math.abs(inputPose.scale.y) + math.abs(inputPose.scale.z)) / 3f;
                 point.worldRadius = parameters.collisionRadius * averagePointScale;
                 min = math.min(min, point.position-new float3(point.worldRadius));
                 max = math.max(max, point.position+new float3(point.worldRadius));
