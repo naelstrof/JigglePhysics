@@ -99,21 +99,23 @@ public struct JiggleCollider {
     }
 
     public float3 GetWorldAxis() {
-        float3 col;
-        switch (capsuleAxis) {
-            case CapsuleAxis.X: col = localToWorldMatrix.c0.xyz; break;
-            case CapsuleAxis.Z: col = localToWorldMatrix.c2.xyz; break;
-            default: col = localToWorldMatrix.c1.xyz; break;
-        }
-        return math.normalizesafe(col, new float3(0, 1, 0));
+        float3 col = capsuleAxis switch {
+            CapsuleAxis.X => localToWorldMatrix.c0.xyz,
+            CapsuleAxis.Y => localToWorldMatrix.c1.xyz,
+            CapsuleAxis.Z => localToWorldMatrix.c2.xyz,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        return math.normalizesafe(col, new float3(0f, 1f, 0f));
     }
 
     public void Read(Transform transform) {
         Read(transform.localToWorldMatrix);
     }
+    
     public void Read(TransformAccess transform) {
         Read(transform.localToWorldMatrix);
     }
+    
     public void Read(float4x4 matrix) {
         localToWorldMatrix = matrix;
         var averageScale = AverageScale(localToWorldMatrix);
