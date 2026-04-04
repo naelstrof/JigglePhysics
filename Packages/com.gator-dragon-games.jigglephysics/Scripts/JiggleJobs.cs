@@ -260,6 +260,10 @@ public class JiggleJobs {
         _memoryBus.ScheduleAdd(collider);
     }
 
+    public void ScheduleAddBatch(List<JiggleColliderSerializable> colliders) {
+        _memoryBus.ScheduleAddBatch(colliders);
+    }
+
     public void ScheduleRemove(JiggleColliderSerializable collider) {
         _memoryBus.ScheduleRemove(collider);
     }

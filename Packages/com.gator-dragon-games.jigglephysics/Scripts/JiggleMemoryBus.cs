@@ -870,6 +870,29 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         pendingSceneColliderAdd.Add(jiggleCollider);
     }
 
+    /// <summary>
+    /// Batch-add colliders with O(n+m) dedup instead of O(n*m).
+    /// Builds a HashSet of existing pending transforms once, then checks each
+    /// new collider against the set instead of scanning the list per collider.
+    /// </summary>
+    public void ScheduleAddBatch(List<JiggleColliderSerializable> colliders) {
+        int pendingCount = pendingSceneColliderAdd.Count;
+        int addCount = colliders.Count;
+
+        // Always create the set — covers dedup against existing AND within the batch itself
+        var existing = new HashSet<Transform>(pendingCount + addCount);
+        for (int i = 0; i < pendingCount; i++) {
+            existing.Add(pendingSceneColliderAdd[i].transform);
+        }
+
+        for (int i = 0; i < addCount; i++) {
+            var c = colliders[i];
+            if (existing.Add(c.transform)) {
+                pendingSceneColliderAdd.Add(c);
+            }
+        }
+    }
+
     public void ScheduleRemove(JiggleColliderSerializable jiggleCollider) {
         var count = pendingSceneColliderAdd.Count;
         for (int i = 0; i < count; i++) {

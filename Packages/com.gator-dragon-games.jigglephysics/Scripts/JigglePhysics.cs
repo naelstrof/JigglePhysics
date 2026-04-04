@@ -107,6 +107,14 @@ public static class JigglePhysics {
         jobs.ScheduleAdd(collider);
     }
 
+    /// <summary>
+    /// Batch-add multiple colliders. Builds a HashSet of existing transforms once,
+    /// then adds all new colliders with O(1) dedup instead of O(n) per collider.
+    /// </summary>
+    public static void AddJiggleColliders(List<JiggleColliderSerializable> colliders) {
+        jobs.ScheduleAddBatch(colliders);
+    }
+
     public static void RemoveJiggleCollider(JiggleColliderSerializable collider) {
         jobs?.ScheduleRemove(collider);
     }
