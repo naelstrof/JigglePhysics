@@ -51,7 +51,8 @@ public unsafe struct JiggleTreeJobData {
         maxExtentPosition = new int2(0);
     }
 
-    public void Set(int newRootID, JiggleSimulatedPoint[] inputPoints, JigglePointParameters[] inputParameters) {
+    public void Set(int newRootID, JiggleSimulatedPoint[] inputPoints, JigglePointParameters[] inputParameters, int colliderCount) {
+        this.colliderCount = (uint)colliderCount;
         rootID = newRootID;
         if (inputPoints.Length != pointCount) {
             Dispose();

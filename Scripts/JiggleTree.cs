@@ -93,22 +93,22 @@ public class JiggleTree {
         this.parameters = parameters.ToArray();
         this.personalColliders = personalColliders.ToArray();
         this.personalColliderTransforms = personalColliderTransforms.ToArray();
+#if UNITY_6000_4_OR_NEWER
+        rootID = bones[0].GetEntityId();
+#else
         rootID = bones[0].GetInstanceID();
+#endif
     }
 
     public void Set(List<Transform> bones, List<JiggleSimulatedPoint> points, List<JigglePointParameters> parameters, List<Transform> personalColliderTransforms, List<JiggleCollider> personalColliders, List<Vector3> restPositions, List<Quaternion> restRotations) {
         var bonesCount = bones.Count;
         var pointsCount = points.Count;
         if (bonesCount == this.bones.Length && pointsCount == this.points.Length) {
-            for (int i = 0; i < bonesCount; i++) {
-                this.bones[i] = bones[i];
-                this.restPositions[i] = restPositions[i];
-                this.restRotations[i] = restRotations[i];
-            }
-            for (int i = 0; i < pointsCount; i++) {
-                this.points[i] = points[i];
-                this.parameters[i] = parameters[i];
-            }
+            bones.CopyTo(this.bones);
+            restPositions.CopyTo(this.restPositions);
+            restRotations.CopyTo(this.restRotations);
+            points.CopyTo(this.points);
+            parameters.CopyTo(this.parameters);
         } else {
             this.bones = bones.ToArray();
             this.points = points.ToArray();
@@ -116,24 +116,25 @@ public class JiggleTree {
             this.restPositions = restPositions.ToArray();
             this.restRotations = restRotations.ToArray();
         }
-        
+
         var personalColliderTransformsCount = personalColliderTransforms.Count;
         var personalCollidersCount = personalColliders.Count;
         if (personalCollidersCount == this.personalColliders.Length && personalColliderTransformsCount == this.personalColliderTransforms.Length) {
-            for (int i = 0; i < personalCollidersCount; i++) {
-                this.personalColliders[i] = personalColliders[i];
-            }
-            for (int i = 0; i < personalColliderTransformsCount; i++) {
-                this.personalColliderTransforms[i] = personalColliderTransforms[i];
-            }
+            personalColliders.CopyTo(this.personalColliders);
+            personalColliderTransforms.CopyTo(this.personalColliderTransforms);
         } else {
             this.personalColliders = personalColliders.ToArray();
             this.personalColliderTransforms = personalColliderTransforms.ToArray();
         }
 
+#if UNITY_6000_4_OR_NEWER
+        rootID = bones[0].GetEntityId();
+#else
         rootID = bones[0].GetInstanceID();
+#endif
+        
         if (hasJiggleTreeStruct) {
-            jiggleTreeJobData.Set(rootID, this.points, this.parameters);
+            jiggleTreeJobData.Set(rootID, this.points, this.parameters, personalCollidersCount);
         }
 
         dirty = false;

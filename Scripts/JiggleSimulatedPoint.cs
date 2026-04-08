@@ -105,7 +105,7 @@ public unsafe struct JiggleSimulatedPoint {
             pose = float3.zero;
         }
         if (!GetIsValid(parentPose)) {
-            pose = float3.zero;
+            parentPose = float3.zero;
         }
         if (!GetIsValid(desiredLengthToParent)) {
             desiredLengthToParent = 0.1f;

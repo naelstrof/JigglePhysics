@@ -700,23 +700,24 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
                 newPersonalColliders += command.tree.personalColliders.Length;
             }
 
-            if (transformCount + newTransforms >= transformCapacity) {
-                ReadIn();
-                ResizeTransformCapacity(Mathf.NextPowerOfTwo(transformCount+newTransforms+1));
-                WriteOut();
-                return;
-            }
-            if (treeCount + newTrees >= treeCapacity) {
-                ReadIn();
-                ResizeTreeCapacity(Mathf.NextPowerOfTwo(treeCount+newTrees+1));
-                WriteOut();
-                return;
-            }
-            if (personalColliderCount + newPersonalColliders >= personalColliderCapacity) {
-                ReadIn();
-                ResizePersonalColliderCapacity(Mathf.NextPowerOfTwo(personalColliderCount+newPersonalColliders+1));
-                WriteOut();
-                return;
+            {
+                bool needsResize = false;
+                if (transformCount + newTransforms >= transformCapacity) {
+                    if (!needsResize) { ReadIn(); needsResize = true; }
+                    ResizeTransformCapacity(Mathf.NextPowerOfTwo(transformCount+newTransforms+1));
+                }
+                if (treeCount + newTrees >= treeCapacity) {
+                    if (!needsResize) { ReadIn(); needsResize = true; }
+                    ResizeTreeCapacity(Mathf.NextPowerOfTwo(treeCount+newTrees+1));
+                }
+                if (personalColliderCount + newPersonalColliders >= personalColliderCapacity) {
+                    if (!needsResize) { ReadIn(); needsResize = true; }
+                    ResizePersonalColliderCapacity(Mathf.NextPowerOfTwo(personalColliderCount+newPersonalColliders+1));
+                }
+                if (needsResize) {
+                    WriteOut();
+                    return;
+                }
             }
 
             for (int i = 0; i < commandCount; i++) {
@@ -870,6 +871,29 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         pendingSceneColliderAdd.Add(jiggleCollider);
     }
 
+    /// <summary>
+    /// Batch-add colliders with O(n+m) dedup instead of O(n*m).
+    /// Builds a HashSet of existing pending transforms once, then checks each
+    /// new collider against the set instead of scanning the list per collider.
+    /// </summary>
+    public void ScheduleAddBatch(List<JiggleColliderSerializable> colliders) {
+        int pendingCount = pendingSceneColliderAdd.Count;
+        int addCount = colliders.Count;
+
+        // Always create the set — covers dedup against existing AND within the batch itself
+        var existing = new HashSet<Transform>(pendingCount + addCount);
+        for (int i = 0; i < pendingCount; i++) {
+            existing.Add(pendingSceneColliderAdd[i].transform);
+        }
+
+        for (int i = 0; i < addCount; i++) {
+            var c = colliders[i];
+            if (existing.Add(c.transform)) {
+                pendingSceneColliderAdd.Add(c);
+            }
+        }
+    }
+
     public void ScheduleRemove(JiggleColliderSerializable jiggleCollider) {
         var count = pendingSceneColliderAdd.Count;
         for (int i = 0; i < count; i++) {
@@ -880,6 +904,38 @@ public void GetResults(out JiggleTransform[] poses, out JiggleTreeJobData[] tree
         }
 
         pendingSceneColliderRemove.Add(jiggleCollider);
+    }
+
+    /// <summary>
+    /// Batch-remove colliders with O(n+m) instead of O(n*m).
+    /// Builds a HashSet of transforms to remove, then does a single pass over
+    /// pendingSceneColliderAdd to cancel pending adds, and queues the rest for removal.
+    /// </summary>
+    public void ScheduleRemoveBatch(List<JiggleColliderSerializable> colliders) {
+        int removeCount = colliders.Count;
+        if (removeCount == 0) return;
+
+        // Build set of transforms we want to remove
+        var toRemove = new HashSet<Transform>(removeCount);
+        for (int i = 0; i < removeCount; i++) {
+            toRemove.Add(colliders[i].transform);
+        }
+
+        // Single pass over pendingSceneColliderAdd: cancel any pending adds that match
+        for (int i = pendingSceneColliderAdd.Count - 1; i >= 0; i--) {
+            if (toRemove.Remove(pendingSceneColliderAdd[i].transform)) {
+                pendingSceneColliderAdd.RemoveAt(i);
+            }
+        }
+
+        // Anything still in toRemove wasn't in the pending add list — queue for actual removal
+        if (toRemove.Count > 0) {
+            for (int i = 0; i < removeCount; i++) {
+                if (toRemove.Contains(colliders[i].transform)) {
+                    pendingSceneColliderRemove.Add(colliders[i]);
+                }
+            }
+        }
     }
 
     public void ScheduleAdd(JiggleTree jiggleTree) {
