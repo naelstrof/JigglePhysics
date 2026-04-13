@@ -10,12 +10,21 @@ public class JiggleUpdateExample : MonoBehaviour {
     [SerializeField] private Material proceduralMaterial;
     [SerializeField] private Mesh sphereMesh;
 
+    private double accumulatedTime;
+    private double fixedTime;
+
     private void LateUpdate() {
         var time = Time.timeAsDouble;
-        var fixedTime = Time.fixedTimeAsDouble;
+        var fixedDeltaTime = Time.fixedDeltaTime;
+        accumulatedTime += Time.deltaTime;
+        if (accumulatedTime > fixedDeltaTime) {
+            while (accumulatedTime > fixedDeltaTime) {
+                fixedTime += fixedDeltaTime;
+                accumulatedTime -= fixedDeltaTime;
+            }
+            JigglePhysics.ScheduleSimulate(fixedTime, time, fixedDeltaTime);
+        }
 
-        JigglePhysics.ScheduleSimulate(fixedTime, time, Time.fixedDeltaTime);
-        
         JigglePhysics.SchedulePose(time);
         if (debugDraw) {
             JigglePhysics.ScheduleRender();
