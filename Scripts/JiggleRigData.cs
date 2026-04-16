@@ -154,7 +154,7 @@ public struct JiggleRigData {
     }
     
     private void VisitAndSetCacheData(List<JiggleTransformCachedData> data, Transform t, Vector3 lastPosition, float currentLength, float totalLength) {
-        if (GetIsExcluded(t)) {
+        if (t == null || GetIsExcluded(t)) {
             return;
         }
         var validChildrenCount = GetValidChildrenCount(t);
@@ -176,21 +176,24 @@ public struct JiggleRigData {
     }
 
     public int GetValidChildrenCount(Transform t) {
+        if (t == null) return 0;
         int count = 0;
         var childCount = t.childCount;
         for(int i=0;i<childCount;i++) {
-            if (GetIsExcluded(t.GetChild(i))) continue;
+            var child = t.GetChild(i);
+            if (child == null || GetIsExcluded(child)) continue;
             count++;
         }
         return count;
     }
 
     public Transform GetValidChild(Transform t, int index) {
+        if (t == null) return null;
         int count = 0;
         var childCount = t.childCount;
         for(int i=0;i<childCount;i++) {
             var child = t.GetChild(i);
-            if (GetIsExcluded(child)) continue;
+            if (child == null || GetIsExcluded(child)) continue;
             if (count == index) {
                 return child;
             }

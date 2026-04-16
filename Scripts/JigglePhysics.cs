@@ -198,14 +198,23 @@ public static class JigglePhysics {
 
     private static void GetJiggleTrees() {
         Profiler.BeginSample("JiggleRoot.GetJiggleTrees");
-        // TODO: Cleanup previous trees, or reuse them.
-        foreach (var rootJiggleTreeSegment in rootJiggleTreeSegments) {
-            var currentTree = rootJiggleTreeSegment.jiggleTree;
+        // Prune any segments whose root Transform has been destroyed out-of-band
+        // (e.g. asset bundle unload, scene teardown, or a rig whose OnDisable was
+        // skipped) before attempting to regenerate their trees.
+        for (int i = rootJiggleTreeSegments.Count - 1; i >= 0; i--) {
+            var seg = rootJiggleTreeSegments[i];
+            if (seg.transform == null || seg.jiggleRigData.rootBone == null) {
+                if (seg.jiggleTree != null) ScheduleRemoveJiggleTree(seg.jiggleTree);
+                jiggleRootLookup.Remove(seg.transform);
+                rootJiggleTreeSegments.RemoveAt(i);
+                continue;
+            }
+            var currentTree = seg.jiggleTree;
             if (currentTree is { dirty: false }) {
                 continue;
             }
-            rootJiggleTreeSegment.RegenerateJiggleTreeIfNeeded();
-            jobs.ScheduleAdd(rootJiggleTreeSegment.jiggleTree);
+            seg.RegenerateJiggleTreeIfNeeded();
+            jobs.ScheduleAdd(seg.jiggleTree);
         }
         Profiler.EndSample();
     }
@@ -260,7 +269,7 @@ public static class JigglePhysics {
     }
 
     public static void VisitForLength(Transform t, JiggleRigData rig, Vector3 lastPosition, float currentLength, out float totalLength) {
-        if (rig.GetIsExcluded(t)) {
+        if (t == null || rig.GetIsExcluded(t)) {
             totalLength = Mathf.Max(currentLength, 0.001f);
             return;
         }
@@ -275,6 +284,10 @@ public static class JigglePhysics {
     }
 
     private static void Visit(Transform t, List<Transform> transforms, List<JiggleSimulatedPoint> points, List<JigglePointParameters> parameters, List<Vector3> restLocalPositions, List<Quaternion> restLocalRotations, int parentIndex, JiggleRigData lastJiggleRig, Vector3 lastPosition, float currentLength, out int newIndex) {
+        if (t == null) {
+            newIndex = -1;
+            return;
+        }
         if (Application.isPlaying && GetJiggleTreeSegmentByBone(t, out JiggleTreeSegment currentJiggleTreeSegment)) {
             lastJiggleRig = currentJiggleTreeSegment.jiggleRigData;
         }
