@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8603014015190147266}
   - component: {fileID: 380688843773095735}
   m_Layer: 0
-  m_Name: JiggleBreasts
+  m_Name: JiggleRope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52,9 +52,9 @@ MonoBehaviour:
     jiggleTreeInputParameters:
       advancedToggle: 1
       collisionToggle: 1
-      angleLimitToggle: 1
+      angleLimitToggle: 0
       stiffness:
-        value: 0.75
+        value: 0.2
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -80,9 +80,9 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      soften: 0.85
+      soften: 1
       angleLimit:
-        value: 0.65
+        value: 0.3
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -108,11 +108,11 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      angleLimitSoften: 1
-      rootStretch: 0
-      ignoreRootMotion: 0.462
+      angleLimitSoften: 0.5
+      rootStretch: 0.1
+      ignoreRootMotion: 0
       stretch:
-        value: 0.55
+        value: 0.1
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -139,7 +139,7 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
       drag:
-        value: 0.033
+        value: 0.5
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -166,7 +166,7 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
       airDrag:
-        value: 0
+        value: 0.1
         curveEnabled: 0
         curve:
           serializedVersion: 2

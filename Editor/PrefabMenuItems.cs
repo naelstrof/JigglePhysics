@@ -16,6 +16,16 @@ public static class PrefabMenuItems {
     private static void CreateJiggleRigTail() {
         CreatePrefabClone("4443ed55f755a7d45b440eea5c2b2ced");
     }
+    
+    [MenuItem("Assets/Create/JiggleRigPrefabs/Hair")]
+    private static void CreateJiggleRigHair() {
+        CreatePrefabClone("46ff5a9b99ff924208d0e8e98abec458");
+    }
+    
+    [MenuItem("Assets/Create/JiggleRigPrefabs/Rope")]
+    private static void CreateJiggleRigRope() {
+        CreatePrefabClone("a399f3252a490feac83cfa325d0c725d");
+    }
 
     private static void CreatePrefabClone(string GUID) {
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(GUID));

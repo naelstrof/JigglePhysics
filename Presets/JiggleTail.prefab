@@ -52,9 +52,9 @@ MonoBehaviour:
     jiggleTreeInputParameters:
       advancedToggle: 1
       collisionToggle: 1
-      angleLimitToggle: 1
+      angleLimitToggle: 0
       stiffness:
-        value: 0.356
+        value: 0.35
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -80,9 +80,9 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      soften: 0.127
+      soften: 0.125
       angleLimit:
-        value: 0.381
+        value: 0.3
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -108,11 +108,11 @@ MonoBehaviour:
           m_PreInfinity: 2
           m_PostInfinity: 2
           m_RotationOrder: 4
-      angleLimitSoften: 0.913
-      rootStretch: 0
-      ignoreRootMotion: 0.462
+      angleLimitSoften: 0.9
+      rootStretch: 0.1
+      ignoreRootMotion: 0.25
       stretch:
-        value: 0.224
+        value: 0.2
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -139,7 +139,7 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
       drag:
-        value: 0.219
+        value: 0.25
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -166,7 +166,7 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
       airDrag:
-        value: 0.095
+        value: 0.1
         curveEnabled: 0
         curve:
           serializedVersion: 2
@@ -252,7 +252,12 @@ MonoBehaviour:
     - bone: {fileID: 0}
       normalizedDistanceFromRoot: 0
       lossyScale: 1.1325998
+      restLocalPosition: {x: 0, y: 0, z: 0}
+      restLocalRotation: {x: 0, y: 0, z: 0, w: 0}
     - bone: {fileID: 0}
       normalizedDistanceFromRoot: 1
       lossyScale: 1.5029601
+      restLocalPosition: {x: 0, y: 0, z: 0}
+      restLocalRotation: {x: 0, y: 0, z: 0, w: 0}
     jiggleColliders: []
+  animatedParameters: 0
