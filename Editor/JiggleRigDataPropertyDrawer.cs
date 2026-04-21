@@ -55,7 +55,7 @@ public class JiggleRigDataPropertyDrawer : PropertyDrawer {
             foreach (JiggleRig otherRig in Object.FindObjectsByType<JiggleRig>(FindObjectsInactive.Exclude,
                          FindObjectsSortMode.None)) {
                 var otherRoot = otherRig.GetJiggleRigData().rootBone;
-                if (rootBone != otherRoot && rootBone.IsChildOf(otherRoot)) {
+                if (rootBone && rootBone != otherRoot && rootBone.IsChildOf(otherRoot)) {
                     isRecursiveRig = true;
                     break;
                 }
