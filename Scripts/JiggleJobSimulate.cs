@@ -12,6 +12,7 @@ public struct JiggleJobSimulate : IJobFor {
     // TODO: doubles are strictly a bad way to track time, probably should be ints or longs.
     public double timeStamp;
     public float3 gravity;
+    public int timeIncrements;
     
     public int sceneColliderCount;
 
@@ -41,6 +42,7 @@ public struct JiggleJobSimulate : IJobFor {
         gravity = Physics.gravity;
         sceneColliderCount = 0;
         deltaTimeSquared = fixedDeltaTime * fixedDeltaTime;
+        timeIncrements = 1;
     }
 
     public void UpdateArrays(JiggleMemoryBus bus) {
@@ -138,8 +140,9 @@ public struct JiggleJobSimulate : IJobFor {
 
             //point->debug = pointLocalPosition;
 
-            var delta = point.position - point.lastPosition;
-            var parentDelta = parent.position - parent.lastPosition;
+            var inverseScaleFactor = (1f / timeIncrements);
+            var delta = (point.position - point.lastPosition)*inverseScaleFactor;
+            var parentDelta = (parent.position - parent.lastPosition)*inverseScaleFactor;
             var localSpaceVelocity = delta - parentDelta;
             var velocity = delta - localSpaceVelocity;
             if (parent.parentIndex != -1) {
@@ -147,13 +150,13 @@ public struct JiggleJobSimulate : IJobFor {
                 point.workingPosition = point.position
                                          + velocity * (1f - parentParameters->airDrag)
                                          +localSpaceVelocity * (1f - parentParameters->drag)
-                                         + gravity * parentParameters->gravityMultiplier * deltaTimeSquared;
+                                         + gravity * parentParameters->gravityMultiplier * deltaTimeSquared * timeIncrements;
             } else {
                 var parameters = tree.parameters + i;
                 point.workingPosition = point.position
                                          + velocity * (1f - parameters->airDrag)
                                          +localSpaceVelocity * (1f - parameters->drag)
-                                         + gravity * parameters->gravityMultiplier * deltaTimeSquared;
+                                         + gravity * parameters->gravityMultiplier * deltaTimeSquared * timeIncrements;
             }
             tree.points[i] = point;
         }
@@ -500,9 +503,8 @@ public struct JiggleJobSimulate : IJobFor {
             }
             error = math.min(error, 1.0f);
             error = math.pow(error, parentParameters->elasticitySoften);
-            point->workingPosition = math.lerp(point->workingPosition, desiredPosition,
-                parentParameters->angleElasticity * error);
-            
+            point->workingPosition = math.lerp(point->workingPosition, desiredPosition, parentParameters->angleElasticity * error);
+
             #endregion
 
             // TODO: Early out if collisions are disabled (or don't for a more accurate solve)

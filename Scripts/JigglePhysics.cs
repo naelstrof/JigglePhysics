@@ -17,31 +17,37 @@ public static class JigglePhysics {
     private static readonly List<Transform> tempColliderTransforms = new ();
     private static List<JiggleTreeSegment> rootJiggleTreeSegments;
     private static bool initializedRendering = false;
+    private static int skips = 0;
 
-    private static double lastFixedCurrentTime = 0f;
     public const float MERGE_DISTANCE = 0.001f;
 
     private static JiggleJobs jobs;
     private static bool hasRunThisFrame;
+    
+    private static double accumulator;
+    private static double lastFixedCurrentTime = 0f;
 
-    public static void ScheduleSimulate(double fixedCurrentTime, double realTime, float fixedDeltaTime) {
+    public static void ScheduleSimulate(double realTime, float fixedDeltaTime) {
         if (hasRunThisFrame) {
             return;
         }
-        if (Math.Abs(lastFixedCurrentTime - fixedCurrentTime) < 0.0001) {
-            return;
-        }
+
+        if (!(realTime - lastFixedCurrentTime > fixedDeltaTime)) return;
         
+        while (realTime - lastFixedCurrentTime > fixedDeltaTime) {
+            lastFixedCurrentTime += fixedDeltaTime;
+            skips++;
+        }
+            
         var rootJiggleTreeSegmentsCount = rootJiggleTreeSegments.Count;
         for (int i = 0; i < rootJiggleTreeSegmentsCount; i++) {
             var segment = rootJiggleTreeSegments[i];
             segment.UpdateParametersIfNeeded();
         }
-        
-        lastFixedCurrentTime = fixedCurrentTime;
-
-        jobs = GetJiggleJobs(fixedCurrentTime, fixedDeltaTime);
-        jobs.Simulate(fixedCurrentTime, realTime);
+            
+        jobs = GetJiggleJobs(lastFixedCurrentTime, fixedDeltaTime);
+        jobs.Simulate(lastFixedCurrentTime, realTime, skips);
+        skips = 0;
         hasRunThisFrame = true;
     }
 
