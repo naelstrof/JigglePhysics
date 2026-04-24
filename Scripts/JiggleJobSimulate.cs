@@ -150,13 +150,13 @@ public struct JiggleJobSimulate : IJobFor {
                 point.workingPosition = point.position
                                          + velocity * (1f - parentParameters->airDrag)
                                          +localSpaceVelocity * (1f - parentParameters->drag)
-                                         + gravity * parentParameters->gravityMultiplier * deltaTimeSquared * timeIncrements;
+                                         + gravity * parentParameters->gravityMultiplier * deltaTimeSquared * inverseScaleFactor;
             } else {
                 var parameters = tree.parameters + i;
                 point.workingPosition = point.position
                                          + velocity * (1f - parameters->airDrag)
                                          +localSpaceVelocity * (1f - parameters->drag)
-                                         + gravity * parameters->gravityMultiplier * deltaTimeSquared * timeIncrements;
+                                         + gravity * parameters->gravityMultiplier * deltaTimeSquared * inverseScaleFactor;
             }
             tree.points[i] = point;
         }
@@ -503,7 +503,9 @@ public struct JiggleJobSimulate : IJobFor {
             }
             error = math.min(error, 1.0f);
             error = math.pow(error, parentParameters->elasticitySoften);
-            point->workingPosition = math.lerp(point->workingPosition, desiredPosition, parentParameters->angleElasticity * error);
+            for (int j = 0; j < timeIncrements; j++) {
+                point->workingPosition = math.lerp(point->workingPosition, desiredPosition, parentParameters->angleElasticity * error);
+            }
 
             #endregion
 
