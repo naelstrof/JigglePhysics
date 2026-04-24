@@ -89,6 +89,7 @@ public class JiggleJobs {
     
     public void SetFixedDeltaTime(float fixedDeltaTime) {
         jobSimulate.SetFixedDeltaTime(fixedDeltaTime);
+        jobInterpolation.SetFixedDeltaTime(fixedDeltaTime);
         jobInputInterpolation.SetFixedDeltaTime(fixedDeltaTime);
     }
 
