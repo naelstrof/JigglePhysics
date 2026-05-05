@@ -36,7 +36,7 @@ public static class JigglePhysics {
         
         while (realTime - lastFixedCurrentTime > fixedDeltaTime) {
             lastFixedCurrentTime += fixedDeltaTime;
-            skips++;
+            skips = Mathf.Min(skips + 1, 1);
         }
             
         var rootJiggleTreeSegmentsCount = rootJiggleTreeSegments.Count;
