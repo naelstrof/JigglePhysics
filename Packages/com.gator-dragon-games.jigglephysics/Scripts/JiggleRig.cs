@@ -76,6 +76,18 @@ public class JiggleRig : MonoBehaviour, IJiggleParameterProvider {
     public void SnapToRestPose() {
         jiggleRigData.SnapToRestPose();
     }
+
+    /// <summary>
+    /// Call right after moving the character instantly (respawn, room change, a cut): the simulated motion moves along
+    /// with it instead of reading the jump as speed, so nothing whips or stretches. Covers every rig in the same tree.
+    /// </summary>
+    /// <returns>False when the rig is not simulating yet; it then starts from the bones' current pose anyway.</returns>
+    public bool Teleport() {
+        if (segment == null || !addedToJiggleTreeSegments) {
+            return false;
+        }
+        return JigglePhysics.Teleport(segment);
+    }
     
     /// <summary>
     /// Sends updated parameters to the jiggle tree on the jobs side.

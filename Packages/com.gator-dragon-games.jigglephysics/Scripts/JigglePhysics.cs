@@ -39,12 +39,8 @@ public static class JigglePhysics {
             skips = Mathf.Min(skips + 1, 1);
         }
             
-        var rootJiggleTreeSegmentsCount = rootJiggleTreeSegments.Count;
-        for (int i = 0; i < rootJiggleTreeSegmentsCount; i++) {
-            var segment = rootJiggleTreeSegments[i];
-            segment.UpdateParametersIfNeeded();
-        }
-            
+        UpdateAnimatedParameters();
+
         jobs = GetJiggleJobs(lastFixedCurrentTime, fixedDeltaTime);
         jobs.Simulate(lastFixedCurrentTime, realTime, skips);
         skips = 0;
@@ -229,6 +225,88 @@ public static class JigglePhysics {
 
     public static JiggleTree CreateJiggleTree(JiggleRigData jiggleRig, JiggleTree tree) {
         Profiler.BeginSample("JiggleTreeUtility.CreateJiggleTree");
+        BuildTreeLists(jiggleRig);
+        Profiler.EndSample();
+        if (tree != null) {
+            tree.Set(tempTransforms, tempPoints, tempParameters, tempColliderTransforms, tempColliders, tempRestLocalPositions, tempRestLocalRotations);
+            return tree;
+        } else {
+            return new JiggleTree(tempTransforms, tempPoints, tempParameters, tempColliderTransforms, tempColliders, tempRestLocalPositions, tempRestLocalRotations);
+        }
+    }
+
+    /// <summary>
+    /// Recomputes the parameters of every point in the tree <paramref name="segment"/> belongs to, exactly as the tree
+    /// was built: each bone takes the parameters of the rig that owns it (nested rigs included), and excluded roots stay
+    /// rigid. Rebuilds the tree instead when its bones or personal colliders changed.
+    /// </summary>
+    public static void UpdateTreeParameters(JiggleTreeSegment segment) {
+        var root = segment.root;
+        var tree = root.jiggleTree;
+        if (tree == null || tree.dirty || !root.transform || !root.jiggleRigData.rootBone) {
+            return;
+        }
+        BuildTreeLists(root.jiggleRigData);
+        if (!TempListsMatch(tree)) {
+            root.SetDirty();
+            return;
+        }
+        jobs?.CompleteRunningJobs(); // the simulate job reads the parameter buffer this overwrites
+        tree.SetParameters(tempParameters);
+    }
+
+    // Whether the temp lists describe the same bones and personal colliders as the tree, point for point.
+    private static bool TempListsMatch(JiggleTree tree) {
+        var boneCount = tree.bones.Length;
+        var colliderCount = tree.personalColliders.Length;
+        if (tempTransforms.Count != boneCount || tempParameters.Count != tree.points.Length
+            || tempColliders.Count != colliderCount || tempColliderTransforms.Count != tree.personalColliderTransforms.Length) {
+            return false;
+        }
+        for (int i = 0; i < boneCount; i++) {
+            if (tempTransforms[i] != tree.bones[i]) return false;
+        }
+        for (int i = 0; i < colliderCount; i++) {
+            var a = tempColliders[i];
+            var b = tree.personalColliders[i];
+            if (tempColliderTransforms[i] != tree.personalColliderTransforms[i] || a.type != b.type || a.radius != b.radius
+                || a.height != b.height || a.capsuleAxis != b.capsuleAxis) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Carries the whole tree <paramref name="segment"/> belongs to along with an instant move of its bones, so the
+    /// jump is not read as speed. Call it right after moving the character.
+    /// </summary>
+    /// <returns>False when the tree is not simulating yet; it then starts from the bones' current pose anyway.</returns>
+    public static bool Teleport(JiggleTreeSegment segment) {
+        var tree = segment.root.jiggleTree;
+        if (tree == null || jobs == null) {
+            return false;
+        }
+        return jobs.Teleport(tree);
+    }
+
+    private static readonly HashSet<JiggleTreeSegment> tempAnimatedRoots = new();
+
+    private static void UpdateAnimatedParameters() {
+        tempAnimatedRoots.Clear();
+        foreach (var segment in jiggleRootLookup.Values) {
+            // A rig destroyed without OnDisable stays in the lookup until GetJiggleTrees prunes it, which runs later.
+            if (segment.HasAnimatedParameters && segment.transform) {
+                tempAnimatedRoots.Add(segment.root);
+            }
+        }
+        foreach (var root in tempAnimatedRoots) {
+            UpdateTreeParameters(root);
+        }
+    }
+
+    // Fills the temp lists with the tree that starts at this rig's root bone, in point order.
+    private static void BuildTreeLists(JiggleRigData jiggleRig) {
         tempTransforms.Clear();
         tempPoints.Clear();
         tempParameters.Clear();
@@ -265,14 +343,6 @@ public static class JigglePhysics {
             var rootPoint = tempPoints[0];
             AddChildToPoint(ref rootPoint, childIndex);
             tempPoints[0] = rootPoint;
-        }
-
-        Profiler.EndSample();
-        if (tree != null) {
-            tree.Set(tempTransforms, tempPoints, tempParameters, tempColliderTransforms, tempColliders, tempRestLocalPositions, tempRestLocalRotations);
-            return tree;
-        } else {
-            return new JiggleTree(tempTransforms, tempPoints, tempParameters, tempColliderTransforms, tempColliders, tempRestLocalPositions, tempRestLocalRotations);
         }
     }
 

@@ -10,12 +10,19 @@ public class JiggleTreeSegment {
     public JiggleTreeSegment parent { get; private set; }
     private IJiggleParameterProvider jiggleProvider;
     public JiggleRigData jiggleRigData => jiggleProvider.GetJiggleRigData();
-    
-    private static List<JigglePointParameters> parametersCache;
+    public bool HasAnimatedParameters => jiggleProvider.HasAnimatedParameters;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void Initialize() {
-        parametersCache = new();
+    /// <summary>
+    /// The segment that owns the simulated tree this one is merged into (itself when it has no parent).
+    /// </summary>
+    public JiggleTreeSegment root {
+        get {
+            var current = this;
+            while (current.parent != null) {
+                current = current.parent;
+            }
+            return current;
+        }
     }
 
     public void SetParent(JiggleTreeSegment jiggleTree) {
@@ -36,16 +43,17 @@ public class JiggleTreeSegment {
         SetDirty();
     }
 
+    [System.Obsolete("Animated parameters are applied by JigglePhysics for every segment; call UpdateParameters() to push an edit.")]
     public void UpdateParametersIfNeeded() {
-        if (jiggleTree != null && jiggleProvider.HasAnimatedParameters) {
-            jiggleRigData.UpdateParameters(jiggleTree, parametersCache);
+        if (HasAnimatedParameters) {
+            JigglePhysics.UpdateTreeParameters(this);
         }
     }
-    
+
+    // A nested segment owns no tree of its own (its bones live in its root's tree), so parameters are always
+    // recomputed for the whole tree; applying one rig's values to every bone breaks nested rigs and excluded roots.
     public void UpdateParameters() {
-        if (jiggleTree != null) {
-            jiggleRigData.UpdateParameters(jiggleTree, parametersCache);
-        }
+        JigglePhysics.UpdateTreeParameters(this);
     }
     
 
