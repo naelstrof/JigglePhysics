@@ -41,6 +41,16 @@ public class JiggleRig : MonoBehaviour, IJiggleParameterProvider {
     }
     #endif
 
+    public void SetBlend(float blend) {
+        jiggleRigData.jiggleTreeInputParameters.blend = blend;
+        jiggleRigData.jiggleTreeInputParameters.useBlend = true;
+        UpdateParameters();
+    }
+    
+    public float GetBlend() {
+        return jiggleRigData.jiggleTreeInputParameters.useBlend ? jiggleRigData.jiggleTreeInputParameters.blend : 1f;
+    }
+
     public void OnInitialize() {
         if (jiggleRigData.rootBone == null) {
             throw new UnityException("Jiggle Rig enabled without a root bone assigned!");

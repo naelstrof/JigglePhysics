@@ -74,6 +74,7 @@ public struct JiggleTreeInputParameters {
     public JiggleTreeCurvedFloat gravity;         // arbitrary
     public JiggleTreeCurvedFloat collisionRadius; // >= 0
     public float blend;                           // 0..1
+    public bool useBlend;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public JigglePointParameters ToJigglePointParameters(float normalizedDistanceFromRoot) {
@@ -107,7 +108,7 @@ public struct JiggleTreeInputParameters {
             angleLimited = angleLimitToggle,
             angleLimit = angleLimitVal,
             angleLimitSoften = angleLimitSoften,
-            blend = 1f,
+            blend = useBlend ? blend : 1f,
             drag = dragVal,
             airDrag = airVal,
             collisionRadius = collisionVal

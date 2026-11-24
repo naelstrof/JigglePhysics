@@ -151,7 +151,7 @@ public class JiggleTree {
         for (int i = 0; i < pointsCount; i++) {
             this.parameters[i] = parameters[i];
         }
-
+        
         if (hasJiggleTreeStruct) {
             jiggleTreeJobData.SetParameters(this.parameters);
         }
