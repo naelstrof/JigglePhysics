@@ -27,6 +27,8 @@ public static class JigglePhysics {
     private static double accumulator;
     private static double lastFixedCurrentTime = 0f;
 
+    public static event Action JigglePoseCompleted;
+
     public static void ScheduleSimulate(double realTime, float fixedDeltaTime) {
         if (hasRunThisFrame) {
             return;
@@ -59,6 +61,7 @@ public static class JigglePhysics {
 
     public static void CompletePose() {
         jobs?.CompletePoses();
+        JigglePoseCompleted?.Invoke();
     }
 
     public static void OnDrawGizmos() {
