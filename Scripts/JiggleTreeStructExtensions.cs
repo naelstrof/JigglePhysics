@@ -39,6 +39,7 @@ public static class JiggleTreeStructExtensions {
         pose.position = SanitizeOutput(pose.position);
         pose.scale = SanitizeOutput(pose.scale);
         pose.rotation = SanitizeOutput(pose.rotation);
+        pose.blend = math.clamp(pose.blend, 0f, 1f);
         
         old.pose = pose;
         old.rootOffset = SanitizeOutput(rootOffset);

@@ -1,5 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine.Jobs;
 
 namespace GatorDragonGames.JigglePhysics {
@@ -28,8 +29,12 @@ public struct JiggleJobTransformWrite : IJobParallelForTransform {
         if (pose.isVirtual) {
             return;
         }
+        if (pose.blend <= 0f) {
+            return;
+        }
 
-        transform.SetPositionAndRotation(pose.position, pose.rotation);
+        transform.GetPositionAndRotation(out var originalPosition, out var originalRotation);
+        transform.SetPositionAndRotation(math.lerp(originalPosition, pose.position, pose.blend), math.slerp(originalRotation, pose.rotation, pose.blend));
         transform.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
 
         var previousLocalPose = previousLocalPoses[index];
