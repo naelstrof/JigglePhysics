@@ -131,7 +131,14 @@ public struct JiggleRigData {
         ValidateCurve(ref jiggleTreeInputParameters.airDrag.curve);
         ValidateCurve(ref jiggleTreeInputParameters.gravity.curve);
         ValidateCurve(ref jiggleTreeInputParameters.collisionRadius.curve);
-        BuildNormalizedDistanceFromRootList();
+        // In Play mode the bones hold the simulated pose, so an Inspector edit that leaves the bone set alone keeps the
+        // authored cache (rest poses, distances); only the runtime lookup, which re-applying Inspector values resets,
+        // is rebuilt.
+        if (Application.isPlaying && CacheMatchesHierarchy()) {
+            RegenerateCacheLookup();
+        } else {
+            BuildNormalizedDistanceFromRootList();
+        }
         for (int i = 0; i < 100; i++) {
             if (!TryUpdateSerialization()) {
                 break;
@@ -147,13 +154,48 @@ public struct JiggleRigData {
             return;
         }
         JigglePhysics.VisitForLength(rootBone, this, rootBone.position, 0f, out var totalLength);
+        // In Play mode the bones hold the simulated pose: bones already cached keep their authored rest pose, read from
+        // the serialized array because the runtime lookup does not survive re-applied Inspector values.
+        Dictionary<Transform, JiggleTransformCachedData> authored = null;
+        if (Application.isPlaying && transformCachedData != null) {
+            authored = new Dictionary<Transform, JiggleTransformCachedData>(transformCachedData.Length);
+            foreach (var cached in transformCachedData) {
+                if (cached.bone) authored[cached.bone] = cached;
+            }
+        }
         var data = new List<JiggleTransformCachedData>();
-        VisitAndSetCacheData(data, rootBone, rootBone.position, 0f, totalLength);
+        VisitAndSetCacheData(data, rootBone, rootBone.position, 0f, totalLength, authored);
         transformCachedData = data.ToArray();
         RegenerateCacheLookup();
     }
-    
-    private void VisitAndSetCacheData(List<JiggleTransformCachedData> data, Transform t, Vector3 lastPosition, float currentLength, float totalLength) {
+
+    // Whether the serialized cache lists exactly the bones a rebuild would visit, in the same order.
+    private bool CacheMatchesHierarchy() {
+        if (!rootBone || transformCachedData == null) {
+            return false;
+        }
+        int index = 0;
+        return MatchesCache(rootBone, ref index) && index == transformCachedData.Length;
+    }
+
+    private bool MatchesCache(Transform t, ref int index) {
+        if (t == null || GetIsExcluded(t)) {
+            return true;
+        }
+        if (index >= transformCachedData.Length || transformCachedData[index].bone != t) {
+            return false;
+        }
+        index++;
+        var validChildrenCount = GetValidChildrenCount(t);
+        for (int i = 0; i < validChildrenCount; i++) {
+            if (!MatchesCache(GetValidChild(t, i), ref index)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void VisitAndSetCacheData(List<JiggleTransformCachedData> data, Transform t, Vector3 lastPosition, float currentLength, float totalLength, Dictionary<Transform, JiggleTransformCachedData> authored) {
         if (t == null || GetIsExcluded(t)) {
             return;
         }
@@ -161,17 +203,22 @@ public struct JiggleRigData {
         var scale = t.lossyScale;
         currentLength += Vector3.Distance(lastPosition, t.position);
         t.GetLocalPositionAndRotation(out var localPosition, out var localRotation);
+        var restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
+        if (authored != null && authored.TryGetValue(t, out var cached)) {
+            localPosition = cached.restLocalPosition;
+            restLocalRotation = cached.restLocalRotation;
+        }
         var position = t.position;
         data.Add(new JiggleTransformCachedData() {
             bone = t,
             restLocalPosition = localPosition,
-            restLocalRotation = new Vector4(localRotation.x, localRotation.y, localRotation.z, localRotation.w),
+            restLocalRotation = restLocalRotation,
             normalizedDistanceFromRoot = currentLength / totalLength,
             lossyScale = (scale.x + scale.y + scale.z)/3f,
         });
         for (int i = 0; i < validChildrenCount; i++) {
             var child = GetValidChild(t, i);
-            VisitAndSetCacheData(data, child, position, currentLength, totalLength);
+            VisitAndSetCacheData(data, child, position, currentLength, totalLength, authored);
         }
     }
 
@@ -240,6 +287,7 @@ public struct JiggleRigData {
     /// </summary>
     /// <param name="tree">Tree to update</param>
     /// <param name="parameters">empty list purely used to prevent allocations</param>
+    [Obsolete("Applies this rig's values to every bone of the tree, which breaks nested rigs and excluded roots. Use JiggleRig.UpdateParameters() or JigglePhysics.UpdateTreeParameters().")]
     public void UpdateParameters(JiggleTree tree, List<JigglePointParameters> parameters) {
         parameters.Clear();
         var bones = tree.bones;
